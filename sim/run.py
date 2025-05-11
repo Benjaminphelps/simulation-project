@@ -1,27 +1,67 @@
 import state
 import rng_models
+import event_handler
 
-# Initialization
+# Initialization of lots and cables according to document.
 current_state = state.State(
-    parking_lots = {
-        1 : state.ParkingLot(num_stations=60)
 
+    parking_lots = {
+        1 : state.ParkingLot(num_stations=60),
+        2 : state.ParkingLot(num_stations=80),
+        3 : state.ParkingLot(num_stations=60),
+        4 : state.ParkingLot(num_stations=70),
+        5 : state.ParkingLot(num_stations=60),
+        6 : state.ParkingLot(num_stations=60),
+        7 : state.ParkingLot(num_stations=50)
         },
+
     cables = {
-        1: state.Cable(max_capacity = 1000)
-        }
+        1: state.Cable(max_capacity = 1000),
+        2: state.Cable(max_capacity = 200),
+        3: state.Cable(max_capacity = 200),
+        4: state.Cable(max_capacity = 200),
+        5: state.Cable(max_capacity = 200),
+        6: state.Cable(max_capacity = 200),
+        7: state.Cable(max_capacity = 200),
+        8: state.Cable(max_capacity = 200),
+        9: state.Cable(max_capacity = 200),
+        } 
 )
 
-# Initialize parking lots
-# lot = state.ParkingLot(id=1, num_stations=60)
+# This is an ever-increasing number just to assign unique vehicle ids. 
+vehicle_id= 0
 
-totalArrs = 0
-# Change later to 23.o
-while (current_state.time <= 1.0):
-    # Next: get a bunch of interarrival times for the hour. CURRENTLY ONLY OPERATIVE FOR THE ONE HOUR!
-    arrivals = rng_models.generate_arrivals_per_hour(current_state.time)
-    print(arrivals)
-    current_state.time+=1000
+# current_state.time always initializes to 0.0
+hour_window = current_state.time
 
-print (totalArrs)
+# This loop ensures we generate times every hour
+while (hour_window <= 23.0):
+    print()
+    print ("STARTING NEW HOUR WINDOW: ", hour_window)
+    print()
+    # For this hour: Generate arrival times and schedule their events.
+    arrivals = rng_models.generate_arrivals_per_hour(hour_window)
+    for arrival_time in arrivals:
+        current_state.schedule_event(state.Event(time=arrival_time, type = 'Vehicle Arrives',vehicle_id = vehicle_id))
+        vehicle_id +=1
+
+    while (hour_window <= current_state.time <= hour_window+1.0):
+        # Terminate if there are no more events
+        if(len(current_state.event_queue) == 0):
+            break
+
+        # Get the next event
+        next_event = current_state.event_queue[0]
+
+        # Update time to next event
+        current_state.time = next_event.time
+
+        # Handle the event
+        event_handler.handle(next_event)
+
+        # Remove the event
+        current_state.pop_event()
+
+    hour_window +=1.0
+    current_state.time = hour_window
 

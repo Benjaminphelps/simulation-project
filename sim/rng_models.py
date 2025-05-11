@@ -9,6 +9,8 @@ def generate_arrivals_per_hour(hour):
     arrivals_dataset.head()
 
     mu = arrivals_dataset['Share_of_charging_transactions'][hour] * 750
-    # print ("mu: ", mu)
-    times = np.sort(np.random.uniform(0,60,np.random.poisson(mu))).tolist()
+    times = np.sort(np.random.uniform(hour,hour+1,np.random.poisson(mu))).tolist()
     return times
+
+
+

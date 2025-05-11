@@ -44,3 +44,11 @@ class State:
         self.cables = cables  # Dict[int, Cable]
         self.event_queue = []  # List[Event]
         self.solar_panels = {}  # Dict[int, float]
+    
+    # SLOW code that schedules events by resorting the list upon arrival of ANY event
+    def schedule_event(self, event):
+        self.event_queue.append(event)
+        self.event_queue.sort(key=lambda e: e.time)
+
+    def pop_event(self):
+        self.event_queue = self.event_queue[1:]
