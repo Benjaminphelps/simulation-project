@@ -16,7 +16,8 @@ current_state = state.State(
         },
 
     cables = {
-        1: state.Cable(max_capacity = 1000),
+        0: state.Cable(max_capacity = 1000),
+        1: state.Cable(max_capacity = 200),
         2: state.Cable(max_capacity = 200),
         3: state.Cable(max_capacity = 200),
         4: state.Cable(max_capacity = 200),
@@ -24,7 +25,7 @@ current_state = state.State(
         6: state.Cable(max_capacity = 200),
         7: state.Cable(max_capacity = 200),
         8: state.Cable(max_capacity = 200),
-        9: state.Cable(max_capacity = 200),
+        9: state.Cable(max_capacity = 200)
         } 
 )
 
