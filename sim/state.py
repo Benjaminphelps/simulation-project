@@ -51,4 +51,4 @@ class State:
         self.event_queue.sort(key=lambda e: e.time)
 
     def pop_event(self):
-        self.event_queue = self.event_queue[1:]
+        self.event_queue.pop(0)
