@@ -62,4 +62,5 @@ class State:
             #     self.event_queue.insert(pos, event)
 
     def pop_event(self):
+        # Since this is one line I feel like we could simply just remove this method and add to the run.py but I don't really mind
         self.event_queue.pop(0)
