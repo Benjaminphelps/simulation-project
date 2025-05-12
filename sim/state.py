@@ -49,6 +49,17 @@ class State:
     def schedule_event(self, event):
         self.event_queue.append(event)
         self.event_queue.sort(key=lambda e: e.time)
+        
+        # Assuming event is already sorted by time
+            # if len(self.event_queue) == 0:
+            #     self.event_queue.append(event)
+            # else:
+            #     time, pos = event.time, len(self.event_queue)-1
+            #     for x in range(len(self.event_queue)):
+            #         if time < self.event_queue[x].time:
+            #             pos = x
+            #             break
+            #     self.event_queue.insert(pos, event)
 
     def pop_event(self):
         self.event_queue.pop(0)
