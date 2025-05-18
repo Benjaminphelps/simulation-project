@@ -53,6 +53,11 @@ class State:
         # Assuming event is already sorted by time
             # if len(self.event_queue) == 0:
             #     self.event_queue.append(event)
+            # elif len(self.event_queue) == 1:
+            #     if event.time < self.event_queue[0].time:
+            #         self.event_queue.insert(0, event)
+            #     else:
+            #         self.event_queue.append(event)
             # else:
             #     time, pos = event.time, len(self.event_queue)-1
             #     for x in range(len(self.event_queue)):
