@@ -6,13 +6,13 @@ import event_handler
 current_state = state.State(
 
     parking_lots = {
-        1 : state.ParkingLot(num_stations=60),
-        2 : state.ParkingLot(num_stations=80),
-        3 : state.ParkingLot(num_stations=60),
-        4 : state.ParkingLot(num_stations=70),
-        5 : state.ParkingLot(num_stations=60),
-        6 : state.ParkingLot(num_stations=60),
-        7 : state.ParkingLot(num_stations=50)
+        1 : state.ParkingLot(spots_available=60),
+        2 : state.ParkingLot(spots_available=80),
+        3 : state.ParkingLot(spots_available=60),
+        4 : state.ParkingLot(spots_available=70),
+        5 : state.ParkingLot(spots_available=60),
+        6 : state.ParkingLot(spots_available=60),
+        7 : state.ParkingLot(spots_available=50)
         },
 
     cables = {
@@ -57,8 +57,8 @@ while (hour_window <= 23.0):
         # Update time to next event
         current_state.time = next_event.time
 
-        # Handle the event
-        event_handler.handle(next_event)
+        # Handle the event (Does this actually want to return state? Because it needs to look at state and also change it)
+        current_state = event_handler.handle(next_event, current_state)
 
         # Remove the event
         current_state.pop_event()

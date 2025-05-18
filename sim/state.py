@@ -14,10 +14,16 @@ class Vehicle:
 
 
 class ParkingLot:
-    def __init__(self, num_stations):
-        self.num_stations = num_stations
+    def __init__(self, spots_available):
+        self.spots_available = spots_available
         self.active_vehicles = []  # list of Vehicle
         self.waiting_queue = []  # list of Vehicle
+
+    def remove_spot(self):
+        self.spots_available = self.spots_available - 1
+    
+    def add_spot(self):
+        self.spots_available = self.spots_available + 1
 
 
 class Cable:
@@ -32,7 +38,7 @@ class Cable:
 class Event:
     def __init__(self, time, type, vehicle_id):
         self.time = time
-        self.type = type  # 'Vehicle Arrives', 'Connection Starts', 'Connection Ends', 'Vehicle Departs'
+        self.type = type  # 'Vehicle Arrives', 'Charging Starts', 'Charging Ends', 'Vehicle Departs'
         self.vehicle_id = vehicle_id
 
 
