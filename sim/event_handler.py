@@ -16,7 +16,8 @@ def handle (event, state):
             print("No suppourt for this event yet!")
 
         case "Vehicle Departs":
-            print("No suppourt for this event yet!")
+            print("Handling event with time: ", event.time, " and type: ", event.type)
+            return handle_vehicle_departure(event, state)
 
         case _:
             print("Unrecognized event!")
@@ -48,3 +49,18 @@ def handle_arrival (event, state):
 
     return state
 
+
+def handle_vehicle_departure (event, state):
+    # Get the vehicle
+    vehicle = state.vehicles[event.vehicle_id]
+    print("Handling departure for vehicle: ", event.vehicle_id)
+    print("Vehicle was in lot: ", vehicle.assigned_parking)
+    print("Vehicle is leaving at time: ", event.time)
+
+    # Free up the parking spot
+    state.parking_lots[vehicle.assigned_parking].add_spot()
+
+    # Remove the vehicle from the system
+    del state.vehicles[event.vehicle_id]
+
+    return state
