@@ -51,27 +51,21 @@ class State:
         self.event_queue = []  # List[Event]
         self.solar_panels = {}  # Dict[int, float]
     
-    # SLOW code that schedules events by resorting the list upon arrival of ANY event
-    def schedule_event(self, event):
-        self.event_queue.append(event)
-        self.event_queue.sort(key=lambda e: e.time)
-        
-        # Assuming event is already sorted by time
-            # if len(self.event_queue) == 0:
-            #     self.event_queue.append(event)
-            # elif len(self.event_queue) == 1:
-            #     if event.time < self.event_queue[0].time:
-            #         self.event_queue.insert(0, event)
-            #     else:
-            #         self.event_queue.append(event)
-            # else:
-            #     time, pos = event.time, len(self.event_queue)-1
-            #     for x in range(len(self.event_queue)):
-            #         if time < self.event_queue[x].time:
-            #             pos = x
-            #             break
-            #     self.event_queue.insert(pos, event)
+    def schedule_event(self, event): 
+        if len(self.event_queue) == 0:
+            self.event_queue.append(event)
+        elif len(self.event_queue) == 1:
+            if event.time < self.event_queue[0].time:
+                self.event_queue.insert(0, event)
+            else:
+                self.event_queue.append(event)
+        else:
+            time, pos = event.time, len(self.event_queue)-1
+            for x in range(len(self.event_queue)):
+                if time < self.event_queue[x].time:
+                    pos = x
+                    break
+            self.event_queue.insert(pos, event)
 
     def pop_event(self):
-        # Since this is one line I feel like we could simply just remove this method and add to the run.py but I don't really mind
         self.event_queue.pop(0)
