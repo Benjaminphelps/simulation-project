@@ -60,11 +60,11 @@ def handle_arrival (event, state):
     return state
 
 
-def handle_charging_start (event, state):
+def handle_charging_start(event, state):
     # Get the vehicle
     vehicle = state.vehicles[event.vehicle_id]
     print("Handling charging start for vehicle: ", event.vehicle_id)
-    print("Vehicle was in lot: ", vehicle.assigned_parking)
+    print("Vehicle is in lot: ", vehicle.assigned_parking)
     print("Vehicle is starting to charge at time: ", event.time)
 
     # Update the vehicle's status
@@ -75,6 +75,21 @@ def handle_charging_start (event, state):
 
     return state
 
+
+def handle_charging_end(event, state):
+    # Get the vehicle
+    vehicle = state.vehicles[event.vehicle_id]
+    print("Handling charging end for vehicle: ", event.vehicle_id)
+    print("Vehicle was in lot: ", vehicle.assigned_parking)
+    print("Vehicle has finished charging at time: ", event.time)
+
+    vehicle.charging_status = 'finished'
+    vehicle.charging_end_time = 'time'
+
+    dep = rng_models.generate_departure_time(event.time)
+    state.schedule(s.Event(time=dep), type='Vehicle Departs', vehicle_id=event.vehicle_id)
+
+    return state
 
 def handle_vehicle_departure (event, state):
     # Get the vehicle
