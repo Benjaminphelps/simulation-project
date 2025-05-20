@@ -1,4 +1,4 @@
-import state
+import state as s
 import rng_models
 
 # "Vehicle Arrives", "Charging Starts", "Charging Ends", "Vehicle Departs"
@@ -10,7 +10,8 @@ def handle (event, state):
             return handle_arrival(event, state)
 
         case "Charging Starts":
-            print("No suppourt for this event yet!")
+            print("Handling event with time: ", event.time, " and type: ", event.type)
+            return handle_charging_start(event, state)
 
         case "Charging Departs":
             print("No suppourt for this event yet!")
@@ -24,20 +25,27 @@ def handle (event, state):
     
 
 def handle_arrival (event, state):
+    # Instantiate a vehicle
+    vehicle = s.Vehicle(id=event.vehicle_id,
+                            arrival_time=event.time,
+                            charging_volume=0,  # to be set later
+                            connection_time=0, # to be set later
+                            adapted_departure_time=0, # to be set later
+                            charging_status='waiting', 
+                            assigned_parking=None,  # not sure yet
+                            )
+    state.vehicles[event.vehicle_id] = vehicle
+    
     # Pick a parking lot
     lot_choices = [int(x) for x in rng_models.generate_lot_choices()]
     print ("My lot preference list is:, ", lot_choices)
     lot_found = False
     for lot in lot_choices:
         if (state.parking_lots[lot].spots_available > 0):
-            print("Found a spot in lot: ",  lot, " which has capacity: ", state.parking_lots[lot].spots_available)
+            print("Found a spot in lot: ",  lot, " which has capacity: ", state.parking_lots[lot].spots_available)            
 
-            # Generate a departure
-            dep = rng_models.generate_departure_time(state.time)
-            print("Departure time was determined to be: ", dep)
-
-            # TODO: Schedule departure event, but i'm really confused about connection times?
-            exit(0)
+            # schedule a start for charging
+            state.schedule_event(state.Event(time=vehicle.charging_start_time, type='Charging Starts', vehicle_id=vehicle.id))
 
             state.parking_lots[lot].remove_spot()
             lot_found = True
@@ -46,6 +54,22 @@ def handle_arrival (event, state):
         print("Didn't find a lot! What to do?")
 
     # If we get here, it means that there was no available lot.
+
+    return state
+
+
+def handle_charging_start (event, state):
+    # Get the vehicle
+    vehicle = state.vehicles[event.vehicle_id]
+    print("Handling charging start for vehicle: ", event.vehicle_id)
+    print("Vehicle was in lot: ", vehicle.assigned_parking)
+    print("Vehicle is starting to charge at time: ", event.time)
+
+    # Update the vehicle's status
+    vehicle.charging_status = 'charging'
+    vehicle.charging_start_time = event.time
+
+    state.schedule_event(state.Event(time=vehicle.charging_end_time), type='Charging Ends', vehicle_id=event.vehicle_id)
 
     return state
 

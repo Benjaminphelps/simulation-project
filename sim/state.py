@@ -1,6 +1,6 @@
 class Vehicle:
     def __init__(self, id, arrival_time, charging_volume, connection_time,
-                 adapted_departure_time, charging_status, assigned_parking=None):
+                 adapted_departure_time, charging_status, assigned_parking):
         self.id = id
         self.arrival_time = arrival_time
         self.charging_volume = charging_volume
