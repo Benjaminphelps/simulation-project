@@ -44,8 +44,10 @@ def handle_arrival (event, state):
         if (state.parking_lots[lot].spots_available > 0):
             print("Found a spot in lot: ",  lot, " which has capacity: ", state.parking_lots[lot].spots_available)            
 
+            # TODO: Set vehicle charging start time
+            
             # schedule a start for charging
-            state.schedule_event(state.Event(time=vehicle.charging_start_time, type='Charging Starts', vehicle_id=vehicle.id))
+            state.schedule_event(s.Event(time=vehicle.charging_start_time, type='Charging Starts', vehicle_id=vehicle.id))
 
             state.parking_lots[lot].remove_spot()
             lot_found = True
@@ -69,7 +71,7 @@ def handle_charging_start (event, state):
     vehicle.charging_status = 'charging'
     vehicle.charging_start_time = event.time
 
-    state.schedule_event(state.Event(time=vehicle.charging_end_time), type='Charging Ends', vehicle_id=event.vehicle_id)
+    state.schedule_event(s.Event(time=vehicle.charging_end_time), type='Charging Ends', vehicle_id=event.vehicle_id)
 
     return state
 
