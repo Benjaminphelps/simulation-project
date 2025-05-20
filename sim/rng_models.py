@@ -20,6 +20,19 @@ def generate_lot_choices():
     # Draw 3 unique samples according to the distribution
     return np.random.choice(lot_options, size=3, replace=False, p=probabilities)
 
+def generate_charging_start_time(start_time):
+    charging_volume_dataset = pd.read_csv('../data/charging_volume.csv', delimiter=';')
+    charging_volume_dataset['Share_of_charging_transactions'] = charging_volume_dataset['Share_of_charging_transactions'].str.replace(',', '.').astype(float)
+    volume_probs = charging_volume_dataset['Share_of_charging_transactions'].values
+    volume_bins = charging_volume_dataset['Charging_volume_[kWh]'].values  # Assume these are integers: 0 = [0,1), 1 = [1,2), etc.
+
+    # Sample charging volume bin and get actual volume
+    volume_bin = np.random.choice(volume_bins, p=volume_probs)
+    charging_volume = np.random.uniform(volume_bin, volume_bin + 1)
+    charging_time = charging_volume / 6  # charging rate is 6 kW
+    print("Charging time (hours): ", charging_time)
+
+    return charging_time
 
 def generate_departure_time(start_time):
     # Load and prepare charging volume distribution
