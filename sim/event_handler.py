@@ -14,8 +14,9 @@ def handle (event, state):
             return handle_charging_start(event, state)
 
         case "Charging Departs":
-            print("No suppourt for this event yet!")
-
+            print("Handling event with time: ", event.time, " and type: ", event.type)
+            return handle_charging_end(event, state)
+        
         case "Vehicle Departs":
             print("Handling event with time: ", event.time, " and type: ", event.type)
             return handle_vehicle_departure(event, state)
