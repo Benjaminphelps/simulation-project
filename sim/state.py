@@ -4,14 +4,15 @@ class Vehicle:
         self.id = id
         self.arrival_time = arrival_time
         self.charging_volume = charging_volume
-        self.connection_time = connection_time
         self.adapted_departure_time = adapted_departure_time
         self.charging_status = charging_status  # 'waiting', 'charging', 'finished'
         self.assigned_parking = assigned_parking  # int or None
         self.parking_attempts = []  # list of int
         self.charging_start_time = None  # float or None
         self.charging_end_time = None  # float or None
-
+        self.connection_start_time = None # float or None
+        self.connection_end_time = None # float or None
+ 
 
 class ParkingLot:
     def __init__(self, spots_available):

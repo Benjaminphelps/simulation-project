@@ -13,7 +13,7 @@ def handle (event, state):
             print("Handling event with time: ", event.time, " and type: ", event.type)
             return handle_charging_start(event, state)
 
-        case "Charging Departs":
+        case "Charging Ends":
             print("Handling event with time: ", event.time, " and type: ", event.type)
             return handle_charging_end(event, state)
         
@@ -22,7 +22,7 @@ def handle (event, state):
             return handle_vehicle_departure(event, state)
 
         case _:
-            print("Unrecognized event!")
+            print("Unrecognized event: ", event.type)
     
 
 def handle_arrival (event, state):
@@ -44,9 +44,15 @@ def handle_arrival (event, state):
     for lot in lot_choices:
         if (state.parking_lots[lot].spots_available > 0):
             print("Found a spot in lot: ",  lot, " which has capacity: ", state.parking_lots[lot].spots_available)            
+            # Vehicle now knows its lot, so it can be set
+            vehicle.assigned_parking = lot
 
-            # TODO: Set vehicle charging start time
-            
+            # Assumption #1: When a car is in a lot, it's connection time starts right away.
+            vehicle.connection_start_time = event.time
+            # Assumption for baseline strategy vehicle begins charging right away
+            # This line will become something more dynamic in the future.
+            vehicle.charging_start_time = event.time
+
             # schedule a start for charging
             state.schedule_event(s.Event(time=vehicle.charging_start_time, type='Charging Starts', vehicle_id=vehicle.id))
             state.parking_lots[lot].remove_spot()
@@ -71,9 +77,9 @@ def handle_charging_start(event, state):
     # Update the vehicle's status
     vehicle.charging_status = 'charging'
     vehicle.charging_start_time = event.time
-    vehicle.charging_end_time = event.time + rng_models.generate_charging_start_time(event.time)
+    vehicle.charging_end_time = event.time + rng_models.generate_charging_time(event.time)
 
-    state.schedule_event(s.Event(time=vehicle.charging_end_time), type='Charging Ends', vehicle_id=event.vehicle_id)
+    state.schedule_event(s.Event(time=vehicle.charging_end_time, type='Charging Ends', vehicle_id=event.vehicle_id) )
 
     return state
 
@@ -83,13 +89,18 @@ def handle_charging_end(event, state):
     vehicle = state.vehicles[event.vehicle_id]
     print("Handling charging end for vehicle: ", event.vehicle_id)
     print("Vehicle was in lot: ", vehicle.assigned_parking)
+    print("Vehicle started charging at: ", vehicle.charging_start_time)
     print("Vehicle has finished charging at time: ", event.time)
+    total_charging_time = event.time - vehicle.charging_start_time
+    elapsed_connection_time = event.time - vehicle.connection_start_time
 
     vehicle.charging_status = 'finished'
     vehicle.charging_end_time = 'time'
 
-    dep = rng_models.generate_departure_time(event.time)
-    state.schedule(s.Event(time=dep), type='Vehicle Departs', vehicle_id=event.vehicle_id)
+    # Yes, this seems correct.
+    dep = rng_models.generate_departure_time(event.time, total_charging_time, elapsed_connection_time)
+
+    state.schedule_event(s.Event(time=dep, type='Vehicle Departs', vehicle_id=event.vehicle_id) )
 
     return state
 
@@ -99,7 +110,8 @@ def handle_vehicle_departure (event, state):
     vehicle = state.vehicles[event.vehicle_id]
     print("Handling departure for vehicle: ", event.vehicle_id)
     print("Vehicle was in lot: ", vehicle.assigned_parking)
-    print("Vehicle is leaving at time: ", event.time)
+    print("Vehicle entered lot at time", vehicle.connection_start_time)
+    print("Vehicle is now leaving at time: ", event.time)
 
     # Free up the parking spot
     state.parking_lots[vehicle.assigned_parking].add_spot()

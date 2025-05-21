@@ -59,10 +59,22 @@ while (hour_window <= 23.0):
 
         # Handle the event (Does this actually want to return state? Because it needs to look at state and also change it)
         current_state = event_handler.handle(next_event, current_state)
+        print()
 
         # Remove the event
         current_state.pop_event()
 
     hour_window +=1.0
     current_state.time = hour_window
+
+print ("-------------------------------------------")
+print ("SIMULATION END:")
+print ("Total no. of vehicles: ", vehicle_id)
+print ("Parking lot 1 spots available: ", current_state.parking_lots[1].spots_available)
+print ("Parking lot 2 spots available: ", current_state.parking_lots[2].spots_available)
+print ("Parking lot 3 spots available: ", current_state.parking_lots[3].spots_available)
+print ("Parking lot 4 spots available: ", current_state.parking_lots[4].spots_available)
+print ("Parking lot 5 spots available: ", current_state.parking_lots[5].spots_available)
+print ("Parking lot 6 spots available: ", current_state.parking_lots[6].spots_available)
+print ("Parking lot 7 spots available: ", current_state.parking_lots[7].spots_available)
 

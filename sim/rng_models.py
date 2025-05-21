@@ -20,7 +20,7 @@ def generate_lot_choices():
     # Draw 3 unique samples according to the distribution
     return np.random.choice(lot_options, size=3, replace=False, p=probabilities)
 
-def generate_charging_start_time(start_time):
+def generate_charging_time(start_time):
     charging_volume_dataset = pd.read_csv('../data/charging_volume.csv', delimiter=';')
     charging_volume_dataset['Share_of_charging_transactions'] = charging_volume_dataset['Share_of_charging_transactions'].str.replace(',', '.').astype(float)
     volume_probs = charging_volume_dataset['Share_of_charging_transactions'].values
@@ -34,13 +34,7 @@ def generate_charging_start_time(start_time):
 
     return charging_time
 
-def generate_departure_time(start_time):
-    # Load and prepare charging volume distribution
-    charging_volume_dataset = pd.read_csv('../data/charging_volume.csv', delimiter=';')
-    charging_volume_dataset['Share_of_charging_transactions'] = charging_volume_dataset['Share_of_charging_transactions'].str.replace(',', '.').astype(float)
-    volume_probs = charging_volume_dataset['Share_of_charging_transactions'].values
-    volume_bins = charging_volume_dataset['Charging_volume_[kWh]'].values  # Assume these are integers: 0 = [0,1), 1 = [1,2), etc.
-
+def generate_departure_time(current_time, total_charging_time, elapsed_connection_time):
     # Load and prepare connection time distribution
     connection_time_dataset = pd.read_csv('../data/connection_time.csv', delimiter=';')
     connection_time_dataset['Share_of_charging_transactions'] = connection_time_dataset['Share_of_charging_transactions'].str.replace(',', '.').astype(float)
@@ -48,26 +42,18 @@ def generate_departure_time(start_time):
     conn_bins = connection_time_dataset['Connection_time_to_charging_station_[h]'].values  # 0 = [0,1), etc.
 
 
-    # Sample charging volume bin and get actual volume
-    volume_bin = np.random.choice(volume_bins, p=volume_probs)
-    charging_volume = np.random.uniform(volume_bin, volume_bin + 1)
-    charging_time = charging_volume / 6  # charging rate is 6 kW
-    print("Charging time (hours): ", charging_time)
-
-    
-
     # Sample connection time bin and get actual time
     conn_bin = np.random.choice(conn_bins, p=conn_probs)
     sampled_conn_time = np.random.uniform(conn_bin, conn_bin + 1)
     
 
     # Enforce minimum connection time
-    min_required_conn_time = 1.4 * charging_time
+    min_required_conn_time = 1.4 * total_charging_time
     connection_time = max(sampled_conn_time, min_required_conn_time)
-    print ("Connection time (hours): ", connection_time)
+    remaining_connection_time = connection_time-elapsed_connection_time
 
     # Compute departure time
-    departure_time = start_time + connection_time
+    departure_time = current_time + remaining_connection_time
     return departure_time
     
 
