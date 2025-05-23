@@ -71,10 +71,15 @@ print ("-------------------------------------------")
 print ("SIMULATION END:")
 print ("Total no. of vehicles: ", vehicle_id)
 print ("Parking lot 1 spots available: ", current_state.parking_lots[1].spots_available)
-print ("Parking lot 2 spots available: ", current_state.parking_lots[2].spots_available)
-print ("Parking lot 3 spots available: ", current_state.parking_lots[3].spots_available)
-print ("Parking lot 4 spots available: ", current_state.parking_lots[4].spots_available)
-print ("Parking lot 5 spots available: ", current_state.parking_lots[5].spots_available)
-print ("Parking lot 6 spots available: ", current_state.parking_lots[6].spots_available)
-print ("Parking lot 7 spots available: ", current_state.parking_lots[7].spots_available)
+
+print ("Parking lot vehicle statuses: ")
+for vehicle in current_state.parking_lots[1].active_vehicles:
+    print(vehicle.departure_time)
+
+# print ("Parking lot 2 spots available: ", current_state.parking_lots[2].spots_available)
+# print ("Parking lot 3 spots available: ", current_state.parking_lots[3].spots_available)
+# print ("Parking lot 4 spots available: ", current_state.parking_lots[4].spots_available)
+# print ("Parking lot 5 spots available: ", current_state.parking_lots[5].spots_available)
+# print ("Parking lot 6 spots available: ", current_state.parking_lots[6].spots_available)
+# print ("Parking lot 7 spots available: ", current_state.parking_lots[7].spots_available)
 

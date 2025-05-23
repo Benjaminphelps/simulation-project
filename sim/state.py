@@ -12,6 +12,8 @@ class Vehicle:
         self.charging_end_time = None  # float or None
         self.connection_start_time = None # float or None
         self.connection_end_time = None # float or None
+
+        self.departure_time = None # float or None
  
 
 class ParkingLot:
@@ -19,7 +21,13 @@ class ParkingLot:
         self.spots_available = spots_available
         self.active_vehicles = []  # list of Vehicle
         self.waiting_queue = []  # list of Vehicle
+    
+    #state.parking_lots[1].add_vehicle(vehicle)
 
+    def add_vehicle(self, vehicle):
+        self.active_vehicles.append(vehicle)
+    def remove_vehicle(self, vehicle):
+        self.active_vehicles.remove(vehicle)
     def remove_spot(self):
         self.spots_available = self.spots_available - 1
     

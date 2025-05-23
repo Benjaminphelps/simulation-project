@@ -46,6 +46,8 @@ def handle_arrival (event, state):
             print("Found a spot in lot: ",  lot, " which has capacity: ", state.parking_lots[lot].spots_available)            
             # Vehicle now knows its lot, so it can be set
             vehicle.assigned_parking = lot
+            # Also put the Vehicle in the lot
+            state.parking_lots[lot].add_vehicle(vehicle)
 
             # Assumption #1: When a car is in a lot, it's connection time starts right away.
             vehicle.connection_start_time = event.time
@@ -100,6 +102,10 @@ def handle_charging_end(event, state):
     # Yes, this seems correct.
     dep = rng_models.generate_departure_time(event.time, total_charging_time, elapsed_connection_time)
 
+
+    # Just making this field for debugging reasons.
+    vehicle.departure_time = dep
+
     state.schedule_event(s.Event(time=dep, type='Vehicle Departs', vehicle_id=event.vehicle_id) )
 
     return state
@@ -115,6 +121,10 @@ def handle_vehicle_departure (event, state):
 
     # Free up the parking spot
     state.parking_lots[vehicle.assigned_parking].add_spot()
+
+    # Also remove car from lot
+    state.parking_lots[vehicle.assigned_parking].remove_vehicle(vehicle)
+
 
     # Remove the vehicle from the system
     del state.vehicles[event.vehicle_id]
