@@ -37,16 +37,16 @@ hour_window = current_state.time
 
 # This loop ensures we generate times every hour
 while (hour_window <= 23.0):
-    print()
+    # print()
     print ("STARTING NEW HOUR WINDOW: ", hour_window)
-    print()
+    # print()
     # For this hour: Generate arrival times and schedule their events.
     arrivals = rng_models.generate_arrivals_per_hour(hour_window)
     for arrival_time in arrivals:
         current_state.schedule_event(state.Event(time=arrival_time, type = 'Vehicle Arrives',vehicle_id = vehicle_id))
         vehicle_id +=1
 
-    while (hour_window <= current_state.time <= hour_window+1.0):
+    while (hour_window <= current_state.time < hour_window+1.0):
         # Terminate if there are no more events
         if(len(current_state.event_queue) == 0):
             break
@@ -56,10 +56,11 @@ while (hour_window <= 23.0):
 
         # Update time to next event
         current_state.time = next_event.time
+        # print(current_state.time)
 
         # Handle the event (Does this actually want to return state? Because it needs to look at state and also change it)
         current_state = event_handler.handle(next_event, current_state)
-        print()
+        # print()
 
         # Remove the event
         current_state.pop_event()

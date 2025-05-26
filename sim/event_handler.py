@@ -6,19 +6,19 @@ def handle (event, state):
     match event.type:
 
         case "Vehicle Arrives":
-            print("Handling event with time: ", event.time, " and type: ", event.type)
+            # print("Handling event with time: ", event.time, " and type: ", event.type)
             return handle_arrival(event, state)
 
         case "Charging Starts":
-            print("Handling event with time: ", event.time, " and type: ", event.type)
+            # print("Handling event with time: ", event.time, " and type: ", event.type)
             return handle_charging_start(event, state)
 
         case "Charging Ends":
-            print("Handling event with time: ", event.time, " and type: ", event.type)
+            # print("Handling event with time: ", event.time, " and type: ", event.type)
             return handle_charging_end(event, state)
         
         case "Vehicle Departs":
-            print("Handling event with time: ", event.time, " and type: ", event.type)
+            # print("Handling event with time: ", event.time, " and type: ", event.type)
             return handle_vehicle_departure(event, state)
 
         case _:
@@ -39,11 +39,11 @@ def handle_arrival (event, state):
     
     # Pick a parking lot
     lot_choices = [int(x) for x in rng_models.generate_lot_choices()]
-    print ("My lot preference list is:, ", lot_choices)
+    # print ("My lot preference list is:, ", lot_choices)
     lot_found = False
     for lot in lot_choices:
         if (state.parking_lots[lot].spots_available > 0):
-            print("Found a spot in lot: ",  lot, " which has capacity: ", state.parking_lots[lot].spots_available)            
+            # print("Found a spot in lot: ",  lot, " which has capacity: ", state.parking_lots[lot].spots_available)            
             # Vehicle now knows its lot, so it can be set
             vehicle.assigned_parking = lot
             # Also put the Vehicle in the lot
@@ -72,9 +72,9 @@ def handle_arrival (event, state):
 def handle_charging_start(event, state):
     # Get the vehicle
     vehicle = state.vehicles[event.vehicle_id]
-    print("Handling charging start for vehicle: ", event.vehicle_id)
-    print("Vehicle is in lot: ", vehicle.assigned_parking)
-    print("Vehicle is starting to charge at time: ", event.time)
+    # print("Handling charging start for vehicle: ", event.vehicle_id)
+    # print("Vehicle is in lot: ", vehicle.assigned_parking)
+    # print("Vehicle is starting to charge at time: ", event.time)
 
     # Update the vehicle's status
     vehicle.charging_status = 'charging'
@@ -89,10 +89,10 @@ def handle_charging_start(event, state):
 def handle_charging_end(event, state):
     # Get the vehicle
     vehicle = state.vehicles[event.vehicle_id]
-    print("Handling charging end for vehicle: ", event.vehicle_id)
-    print("Vehicle was in lot: ", vehicle.assigned_parking)
-    print("Vehicle started charging at: ", vehicle.charging_start_time)
-    print("Vehicle has finished charging at time: ", event.time)
+    # print("Handling charging end for vehicle: ", event.vehicle_id)
+    # print("Vehicle was in lot: ", vehicle.assigned_parking)
+    # print("Vehicle started charging at: ", vehicle.charging_start_time)
+    # print("Vehicle has finished charging at time: ", event.time)
     total_charging_time = event.time - vehicle.charging_start_time
     elapsed_connection_time = event.time - vehicle.connection_start_time
 
@@ -114,10 +114,10 @@ def handle_charging_end(event, state):
 def handle_vehicle_departure (event, state):
     # Get the vehicle
     vehicle = state.vehicles[event.vehicle_id]
-    print("Handling departure for vehicle: ", event.vehicle_id)
-    print("Vehicle was in lot: ", vehicle.assigned_parking)
-    print("Vehicle entered lot at time", vehicle.connection_start_time)
-    print("Vehicle is now leaving at time: ", event.time)
+    # print("Handling departure for vehicle: ", event.vehicle_id)
+    # print("Vehicle was in lot: ", vehicle.assigned_parking)
+    # print("Vehicle entered lot at time", vehicle.connection_start_time)
+    # print("Vehicle is now leaving at time: ", event.time)
 
     # Free up the parking spot
     state.parking_lots[vehicle.assigned_parking].add_spot()

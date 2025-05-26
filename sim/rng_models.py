@@ -30,7 +30,7 @@ def generate_charging_time(start_time):
     volume_bin = np.random.choice(volume_bins, p=volume_probs)
     charging_volume = np.random.uniform(volume_bin, volume_bin + 1)
     charging_time = charging_volume / 6  # charging rate is 6 kW
-    print("Charging time (hours): ", charging_time)
+    # print("Charging time (hours): ", charging_time)
 
     return charging_time
 
