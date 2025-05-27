@@ -23,7 +23,6 @@ def handle (event, state):
 
         case _:
             print("Unrecognized event: ", event.type)
-    
 
 def handle_arrival (event, state):
     # Instantiate a vehicle
@@ -78,7 +77,6 @@ def handle_charging_start(event, state):
 
     # Update the vehicle's status
     vehicle.charging_status = 'charging'
-    vehicle.charging_start_time = event.time
     vehicle.charging_end_time = event.time + rng_models.generate_charging_time(event.time)
 
     state.schedule_event(s.Event(time=vehicle.charging_end_time, type='Charging Ends', vehicle_id=event.vehicle_id) )
