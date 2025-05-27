@@ -68,6 +68,20 @@ class State:
         self.event_queue = []  # List[Event]
         self.solar_panels = {}  # Dict[int, float]
     
+    def update_cable_loads(self):
+        self.cables[2].current_load = self.parking_lots[1].current_load
+        self.cables[3].current_load = self.parking_lots[2].current_load
+        self.cables[4].current_load = self.parking_lots[3].current_load
+        self.cables[1].current_load = self.cables[2].current_load + self.cables[3].current_load + self.cables[4].current_load
+
+        self.cables[9].current_load = self.parking_lots[6].current_load
+        self.cables[8].current_load = self.parking_lots[5].current_load
+        self.cables[7].current_load = self.cables[8].current_load + self.cables[9].current_load
+        self.cables[6].current_load = self.parking_lots[7].current_load
+        self.cables[5].current_load = self.cables[6].current_load + self.cables[7].current_load
+
+        self.cables[0].current_load = self.cables[1].current_load + self.cables[5].current_load
+
     def schedule_event(self, event): 
         if len(self.event_queue) == 0:
             self.event_queue.append(event)

@@ -74,14 +74,36 @@ print ("Total no. of vehicles: ", vehicle_id)
 print ("Parking lot 1 spots available: ", current_state.parking_lots[1].spots_available)
 print ("Parking lot 1 current load: ", current_state.parking_lots[1].current_load)
 print ("Parking lot vehicle statuses: ")
-for vehicle in current_state.parking_lots[1].active_vehicles:
-    print(vehicle.departure_time)
-# count vehilces with charging status
 ct = 0
 for vehicle in current_state.parking_lots[1].active_vehicles:
     if vehicle.charging_status == 'charging':
         ct += 1
 print ("No. of vehicles currently charging in lot 1: ", ct)
+for vehicle in current_state.parking_lots[1].active_vehicles:
+    print(vehicle.departure_time)
+# print cable loads
+# print ("Cable 0 current load: ", current_state.cables[0].current_load)
+# print ("Cable 1 current load: ", current_state.cables[1].current_load)
+# print ("Cable 2 current load: ", current_state.cables[2].current_load)
+# print ("Cable 3 current load: ", current_state.cables[3].current_load)
+# print ("Cable 4 current load: ", current_state.cables[4].current_load)
+# print ("Cable 5 current load: ", current_state.cables[5].current_load)
+# print ("Cable 6 current load: ", current_state.cables[6].current_load)
+# print ("Cable 7 current load: ", current_state.cables[7].current_load)
+# print ("Cable 8 current load: ", current_state.cables[8].current_load)
+# print ("Cable 9 current load: ", current_state.cables[9].current_load)
+
+# print("-------------------------------------------")
+
+# print paking lots current loads
+# print ("Parking lot 1 current load: ", current_state.parking_lots[1].current_load)
+# print ("Parking lot 2 current load: ", current_state.parking_lots[2].current_load)
+# print ("Parking lot 3 current load: ", current_state.parking_lots[3].current_load)
+# print ("Parking lot 4 current load: ", current_state.parking_lots[4].current_load)
+# print ("Parking lot 5 current load: ", current_state.parking_lots[5].current_load)
+# print ("Parking lot 6 current load: ", current_state.parking_lots[6].current_load)
+# print ("Parking lot 7 current load: ", current_state.parking_lots[7].current_load)
+
 # print ("Parking lot 2 spots available: ", current_state.parking_lots[2].spots_available)
 # print ("Parking lot 3 spots available: ", current_state.parking_lots[3].spots_available)
 # print ("Parking lot 4 spots available: ", current_state.parking_lots[4].spots_available)

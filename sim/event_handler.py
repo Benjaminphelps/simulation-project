@@ -80,6 +80,9 @@ def handle_charging_start(event, state):
     vehicle.charging_end_time = event.time + rng_models.generate_charging_time(event.time)
     state.parking_lots[vehicle.assigned_parking].add_vehicle_load()
 
+    # Update cable loads
+    state.update_cable_loads()  # Assuming 6 kW charging rate
+
     state.schedule_event(s.Event(time=vehicle.charging_end_time, type='Charging Ends', vehicle_id=event.vehicle_id) )
 
     return state
@@ -102,6 +105,8 @@ def handle_charging_end(event, state):
     # Yes, this seems correct.
     dep = rng_models.generate_departure_time(event.time, total_charging_time, elapsed_connection_time)
 
+    # Update cable loads
+    state.update_cable_loads()
 
     # Just making this field for debugging reasons.
     vehicle.departure_time = dep
