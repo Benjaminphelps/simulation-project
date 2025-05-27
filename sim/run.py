@@ -115,18 +115,31 @@ print ("No. of vehicles currently charging in lot 1: ", ct)
 for vehicle in current_state.parking_lots[1].active_vehicles:
     print(vehicle.departure_time)
 # print cable loads
-# print ("Cable 0 current load: ", current_state.cables[0].current_load)
-# print ("Cable 1 current load: ", current_state.cables[1].current_load)
-# print ("Cable 2 current load: ", current_state.cables[2].current_load)
-# print ("Cable 3 current load: ", current_state.cables[3].current_load)
-# print ("Cable 4 current load: ", current_state.cables[4].current_load)
-# print ("Cable 5 current load: ", current_state.cables[5].current_load)
-# print ("Cable 6 current load: ", current_state.cables[6].current_load)
-# print ("Cable 7 current load: ", current_state.cables[7].current_load)
-# print ("Cable 8 current load: ", current_state.cables[8].current_load)
-# print ("Cable 9 current load: ", current_state.cables[9].current_load)
+print ("Cable 0 current load: ", current_state.cables[0].current_load)
+print ("Cable 1 current load: ", current_state.cables[1].current_load)
+print ("Cable 2 current load: ", current_state.cables[2].current_load)
+print ("Cable 3 current load: ", current_state.cables[3].current_load)
+print ("Cable 4 current load: ", current_state.cables[4].current_load)
+print ("Cable 5 current load: ", current_state.cables[5].current_load)
+print ("Cable 6 current load: ", current_state.cables[6].current_load)
+print ("Cable 7 current load: ", current_state.cables[7].current_load)
+print ("Cable 8 current load: ", current_state.cables[8].current_load)
+print ("Cable 9 current load: ", current_state.cables[9].current_load)
 
-# print("-------------------------------------------")
+print("-------------------------------------------")
+
+# print cables blackout status
+print ("Cable 0 blackout status: ", current_state.cables[0].is_blacked_out)
+print ("Cable 1 blackout status: ", current_state.cables[1].is_blacked_out)
+print ("Cable 2 blackout status: ", current_state.cables[2].is_blacked_out)
+print ("Cable 3 blackout status: ", current_state.cables[3].is_blacked_out)
+print ("Cable 4 blackout status: ", current_state.cables[4].is_blacked_out)
+print ("Cable 5 blackout status: ", current_state.cables[5].is_blacked_out)
+print ("Cable 6 blackout status: ", current_state.cables[6].is_blacked_out)
+print ("Cable 7 blackout status: ", current_state.cables[7].is_blacked_out)
+print ("Cable 8 blackout status: ", current_state.cables[8].is_blacked_out)
+print ("Cable 9 blackout status: ", current_state.cables[9].is_blacked_out)
+
 
 # print paking lots current loads
 # print ("Parking lot 1 current load: ", current_state.parking_lots[1].current_load)

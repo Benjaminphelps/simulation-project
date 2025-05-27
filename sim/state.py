@@ -50,6 +50,7 @@ class Cable:
         self.load_time_series = []  # list of (time, load)
         self.overload_time = 0.0
         self.blackout_time = 0.0
+        self.is_blacked_out = False
 
 
 class Event:
@@ -81,6 +82,13 @@ class State:
         self.cables[5].current_load = self.cables[6].current_load + self.cables[7].current_load
 
         self.cables[0].current_load = self.cables[1].current_load + self.cables[5].current_load
+
+        for cable in self.cables.values():
+            # if cable load >= 110% of max capacity, blackout 
+            if cable.current_load >= 1.1 * cable.max_capacity:
+                cable.is_blacked_out = True
+            else:
+                cable.is_blacked_out = False
 
     def schedule_event(self, event): 
         if len(self.event_queue) == 0:
