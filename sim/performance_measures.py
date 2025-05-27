@@ -3,7 +3,7 @@ class Measures:
                  percentage_delayed_vehicles, average_vehicle_delay, max_delay):
 
         # Cable load
-        self.max_loads = {max_loads} # Dict[int (lot id), int (max load)]
+        self.max_loads = max_loads # Dict[int (lot id), int (max load)]
         self.percentage_blackout_time = percentage_blackout_time # Float
         self.percentage_underload_time = percentage_underload_time # Float
         self.load_over_time = load_over_time #Float
@@ -14,6 +14,7 @@ class Measures:
         self.max_delay = max_delay # In document: 'maximum delays' -> Why plural?
 
     def update_measures(self, before_event, after_event): # -> not sure if we actually need before and after? TBD.
-        pass
+        # After cable load and stuff is handled, can actually update all the measures.
+        print("!!UPDATING MEASURES!!!")
 
 

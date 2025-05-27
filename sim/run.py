@@ -1,6 +1,7 @@
 import state
 import rng_models
 import event_handler
+import performance_measures
 
 # Initialization of lots and cables according to document.
 current_state = state.State(
@@ -27,6 +28,33 @@ current_state = state.State(
         8: state.Cable(max_capacity = 200),
         9: state.Cable(max_capacity = 200)
         } 
+)
+
+# Initialization of performance measures class
+performance_measures = performance_measures.Measures(
+
+    # Init cable load
+    max_loads={
+        0 : 0,
+        1 : 0,
+        2 : 0,
+        3 : 0,
+        4 : 0,
+        5 : 0,
+        6 : 0,
+        7 : 0,
+        8 : 0,
+        9 : 0
+    },
+
+    percentage_blackout_time = 0,
+    percentage_underload_time = 0,
+    load_over_time = 0,
+
+    # Init departure delays
+    percentage_delayed_vehicles = 0,
+    average_vehicle_delay = 0,
+    max_delay = 0
 )
 
 # This is an ever-increasing number just to assign unique vehicle ids. 
@@ -58,9 +86,14 @@ while (hour_window <= 23.0):
         current_state.time = next_event.time
         # print(current_state.time)
 
+        # Save previous state so we can use it in performance measures
+        prev_state = current_state
+
         # Handle the event (Does this actually want to return state? Because it needs to look at state and also change it)
         current_state = event_handler.handle(next_event, current_state)
-        # print()
+
+        # Update performance measures based on state before event and state after event
+        performance_measures.update_measures(prev_state,current_state)
 
         # Remove the event
         current_state.pop_event()
