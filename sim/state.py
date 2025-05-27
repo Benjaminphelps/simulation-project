@@ -21,6 +21,7 @@ class ParkingLot:
         self.spots_available = spots_available
         self.active_vehicles = []  # list of Vehicle
         self.waiting_queue = []  # list of Vehicle
+        self.current_load = 0.0  # current load in kW
     
     #state.parking_lots[1].add_vehicle(vehicle)
 
@@ -33,6 +34,13 @@ class ParkingLot:
     
     def add_spot(self):
         self.spots_available = self.spots_available + 1
+
+    # vehicle with 6 kw/h load
+    def add_vehicle_load(self):
+        self.current_load += 6.0
+
+    def remove_vehicle_load(self):
+        self.current_load -= 6.0
 
 
 class Cable:

@@ -78,6 +78,7 @@ def handle_charging_start(event, state):
     # Update the vehicle's status
     vehicle.charging_status = 'charging'
     vehicle.charging_end_time = event.time + rng_models.generate_charging_time(event.time)
+    state.parking_lots[vehicle.assigned_parking].add_vehicle_load()
 
     state.schedule_event(s.Event(time=vehicle.charging_end_time, type='Charging Ends', vehicle_id=event.vehicle_id) )
 
@@ -93,6 +94,7 @@ def handle_charging_end(event, state):
     # print("Vehicle has finished charging at time: ", event.time)
     total_charging_time = event.time - vehicle.charging_start_time
     elapsed_connection_time = event.time - vehicle.connection_start_time
+    state.parking_lots[vehicle.assigned_parking].remove_vehicle_load()
 
     vehicle.charging_status = 'finished'
     vehicle.charging_end_time = 'time'
