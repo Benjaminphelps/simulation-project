@@ -61,11 +61,31 @@ class Event:
 
 
 class State:
-    def __init__(self, parking_lots, cables):
+    def __init__(self):
+        self.non_served_vehicles = 0
         self.time = 0.0
         self.vehicles = {}  # Dict[int, Vehicle]
-        self.parking_lots = parking_lots # Dict[int, ParkingLot]
-        self.cables = cables  # Dict[int, Cable]
+        self.parking_lots = {
+        1 : ParkingLot(spots_available=60),
+        2 : ParkingLot(spots_available=80),
+        3 : ParkingLot(spots_available=60),
+        4 : ParkingLot(spots_available=70),
+        5 : ParkingLot(spots_available=60),
+        6 : ParkingLot(spots_available=60),
+        7 : ParkingLot(spots_available=50)
+        } # Dict[int, ParkingLot]
+        self.cables = {
+        1: Cable(max_capacity = 200),
+        2: Cable(max_capacity = 200),
+        0: Cable(max_capacity = 1000),
+        3: Cable(max_capacity = 200),
+        4: Cable(max_capacity = 200),
+        5: Cable(max_capacity = 200),
+        6: Cable(max_capacity = 200),
+        7: Cable(max_capacity = 200),
+        8: Cable(max_capacity = 200),
+        9: Cable(max_capacity = 200)
+        }   # Dict[int, Cable]
         self.event_queue = []  # List[Event]
         self.solar_panels = {}  # Dict[int, float]
     
@@ -108,3 +128,6 @@ class State:
 
     def pop_event(self):
         self.event_queue.pop(0)
+    
+    def add_non_served_vehicle(self):
+        self.non_served_vehicles += 1

@@ -2,60 +2,13 @@ import state
 import rng_models
 import event_handler
 import performance_measures
+import copy
 
-# Initialization of lots and cables according to document.
-current_state = state.State(
+# Init state
+current_state = state.State()
 
-    parking_lots = {
-        1 : state.ParkingLot(spots_available=60),
-        2 : state.ParkingLot(spots_available=80),
-        3 : state.ParkingLot(spots_available=60),
-        4 : state.ParkingLot(spots_available=70),
-        5 : state.ParkingLot(spots_available=60),
-        6 : state.ParkingLot(spots_available=60),
-        7 : state.ParkingLot(spots_available=50)
-        },
-
-    cables = {
-        0: state.Cable(max_capacity = 1000),
-        1: state.Cable(max_capacity = 200),
-        2: state.Cable(max_capacity = 200),
-        3: state.Cable(max_capacity = 200),
-        4: state.Cable(max_capacity = 200),
-        5: state.Cable(max_capacity = 200),
-        6: state.Cable(max_capacity = 200),
-        7: state.Cable(max_capacity = 200),
-        8: state.Cable(max_capacity = 200),
-        9: state.Cable(max_capacity = 200)
-        } 
-)
-
-# Initialization of performance measures class
-performance_measures = performance_measures.Measures(
-
-    # Init cable load
-    max_loads={
-        0 : 0,
-        1 : 0,
-        2 : 0,
-        3 : 0,
-        4 : 0,
-        5 : 0,
-        6 : 0,
-        7 : 0,
-        8 : 0,
-        9 : 0
-    },
-
-    total_overload_time = 0,
-    total_underload_time = 0,
-    load_over_time = 0,
-
-    # Init departure delays
-    percentage_delayed_vehicles = 0,
-    average_vehicle_delay = 0,
-    max_delay = 0
-)
+# Init performance measures
+stats = performance_measures.Measures()
 
 # This is an ever-increasing number just to assign unique vehicle ids. 
 vehicle_id= 0
@@ -64,9 +17,11 @@ vehicle_id= 0
 hour_window = current_state.time
 
 # This loop ensures we generate times every hour
+print ("-------------------------------------------")
+print("SIMULATION START")
 while (hour_window <= 23.0):
     # print()
-    print ("STARTING NEW HOUR WINDOW: ", hour_window)
+    print ("Hour: ", hour_window)
     # print()
     # For this hour: Generate arrival times and schedule their events.
     arrivals = rng_models.generate_arrivals_per_hour(hour_window)
@@ -78,7 +33,9 @@ while (hour_window <= 23.0):
         # Terminate if there are no more events
         if(len(current_state.event_queue) == 0):
             break
-
+        
+        # Adds a bit of overhead but simplifies pretty well.
+        prev_state = copy.copy(current_state)
         # Get the next event
         next_event = current_state.event_queue[0]
 
@@ -87,13 +44,12 @@ while (hour_window <= 23.0):
         # print(current_state.time)
 
         # Save previous state so we can use it in performance measures
-        prev_state = current_state
 
         # Handle the event (Does this actually want to return state? Because it needs to look at state and also change it)
         current_state = event_handler.handle(next_event, current_state)
 
         # Update performance measures based on state before event and state after event
-        performance_measures.update_measures(prev_state,current_state)
+        stats.update_measures(prev_state,current_state)
 
         # Remove the event
         current_state.pop_event()
@@ -101,66 +57,4 @@ while (hour_window <= 23.0):
     hour_window +=1.0
     current_state.time = hour_window
 
-print ("-------------------------------------------")
-print ("SIMULATION END:")
-print ("Total no. of vehicles: ", vehicle_id)
-
-
-print("")
-# print ("Parking lot 1 spots available: ", current_state.parking_lots[1].spots_available)
-# print ("Parking lot 1 current load: ", current_state.parking_lots[1].current_load)
-# print ("Parking lot vehicle statuses: ")
-
-
-
-
-# ct = 0
-# for vehicle in current_state.parking_lots[1].active_vehicles:
-#     if vehicle.charging_status == 'charging':
-#         ct += 1
-# print ("No. of vehicles currently charging in lot 1: ", ct)
-# for vehicle in current_state.parking_lots[1].active_vehicles:
-#     print(vehicle.departure_time)
-# print cable loads
-print ("Cable 0 current load: ", current_state.cables[0].current_load)
-print ("Cable 1 current load: ", current_state.cables[1].current_load)
-print ("Cable 2 current load: ", current_state.cables[2].current_load)
-print ("Cable 3 current load: ", current_state.cables[3].current_load)
-print ("Cable 4 current load: ", current_state.cables[4].current_load)
-print ("Cable 5 current load: ", current_state.cables[5].current_load)
-print ("Cable 6 current load: ", current_state.cables[6].current_load)
-print ("Cable 7 current load: ", current_state.cables[7].current_load)
-print ("Cable 8 current load: ", current_state.cables[8].current_load)
-print ("Cable 9 current load: ", current_state.cables[9].current_load)
-
-# print("-------------------------------------------")
-
-# print cables blackout status
-print ("Cable 0 blackout status: ", current_state.cables[0].is_blacked_out)
-print ("Cable 1 blackout status: ", current_state.cables[1].is_blacked_out)
-print ("Cable 2 blackout status: ", current_state.cables[2].is_blacked_out)
-print ("Cable 3 blackout status: ", current_state.cables[3].is_blacked_out)
-print ("Cable 4 blackout status: ", current_state.cables[4].is_blacked_out)
-print ("Cable 5 blackout status: ", current_state.cables[5].is_blacked_out)
-print ("Cable 6 blackout status: ", current_state.cables[6].is_blacked_out)
-print ("Cable 7 blackout status: ", current_state.cables[7].is_blacked_out)
-print ("Cable 8 blackout status: ", current_state.cables[8].is_blacked_out)
-print ("Cable 9 blackout status: ", current_state.cables[9].is_blacked_out)
-
-
-# print paking lots current loads
-# print ("Parking lot 1 current load: ", current_state.parking_lots[1].current_load)
-# print ("Parking lot 2 current load: ", current_state.parking_lots[2].current_load)
-# print ("Parking lot 3 current load: ", current_state.parking_lots[3].current_load)
-# print ("Parking lot 4 current load: ", current_state.parking_lots[4].current_load)
-# print ("Parking lot 5 current load: ", current_state.parking_lots[5].current_load)
-# print ("Parking lot 6 current load: ", current_state.parking_lots[6].current_load)
-# print ("Parking lot 7 current load: ", current_state.parking_lots[7].current_load)
-
-# print ("Parking lot 2 spots available: ", current_state.parking_lots[2].spots_available)
-# print ("Parking lot 3 spots available: ", current_state.parking_lots[3].spots_available)
-# print ("Parking lot 4 spots available: ", current_state.parking_lots[4].spots_available)
-# print ("Parking lot 5 spots available: ", current_state.parking_lots[5].spots_available)
-# print ("Parking lot 6 spots available: ", current_state.parking_lots[6].spots_available)
-# print ("Parking lot 7 spots available: ", current_state.parking_lots[7].spots_available)
-
+stats.report_final_measures(current_state)

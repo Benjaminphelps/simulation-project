@@ -61,7 +61,7 @@ def handle_arrival (event, state):
             lot_found = True
             break
     if not lot_found:
-        print("Didn't find a lot! What to do?")
+        state.add_non_served_vehicle()
 
     # If we get here, it means that there was no available lot.
 
@@ -100,7 +100,7 @@ def handle_charging_end(event, state):
     state.parking_lots[vehicle.assigned_parking].remove_vehicle_load()
 
     vehicle.charging_status = 'finished'
-    vehicle.charging_end_time = 'time'
+    vehicle.charging_end_time = state.time
 
     # Yes, this seems correct.
     dep = rng_models.generate_departure_time(event.time, total_charging_time, elapsed_connection_time)
@@ -119,10 +119,6 @@ def handle_charging_end(event, state):
 def handle_vehicle_departure (event, state):
     # Get the vehicle
     vehicle = state.vehicles[event.vehicle_id]
-    # print("Handling departure for vehicle: ", event.vehicle_id)
-    # print("Vehicle was in lot: ", vehicle.assigned_parking)
-    # print("Vehicle entered lot at time", vehicle.connection_start_time)
-    # print("Vehicle is now leaving at time: ", event.time)
 
     # Free up the parking spot
     state.parking_lots[vehicle.assigned_parking].add_spot()
