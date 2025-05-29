@@ -4,8 +4,12 @@ import event_handler
 import performance_measures
 import copy
 
-# Init state
-current_state = state.State()
+
+# 1 = Base, 2 = Price-driven, 3 = FCFS, 4 = ELFS
+charging_strategy = 2
+
+# Init state w/charging strategy
+current_state = state.State(charging_strategy = charging_strategy)
 
 # Init performance measures
 stats = performance_measures.Measures()
@@ -16,10 +20,13 @@ vehicle_id= 0
 # current_state.time always initializes to 0.0
 hour_window = current_state.time
 
+# 10 days takes about 10 seconds to run on my computer
+number_of_days = 10
+
 # This loop ensures we generate times every hour
 print ("-------------------------------------------")
 print("SIMULATION START")
-while (hour_window <= 23.0):
+while (hour_window <= (24*number_of_days)-1):
     # print()
     print ("Hour: ", hour_window)
     # print()
@@ -30,6 +37,7 @@ while (hour_window <= 23.0):
         vehicle_id +=1
 
     while (hour_window <= current_state.time < hour_window+1.0):
+        
         # Terminate if there are no more events
         if(len(current_state.event_queue) == 0):
             break

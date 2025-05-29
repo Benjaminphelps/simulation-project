@@ -61,7 +61,8 @@ class Event:
 
 
 class State:
-    def __init__(self):
+    def __init__(self, charging_strategy):
+        self.charging_strategy = charging_strategy
         self.non_served_vehicles = 0
         self.time = 0.0
         self.vehicles = {}  # Dict[int, Vehicle]

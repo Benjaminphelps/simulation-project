@@ -60,6 +60,7 @@ class Measures:
         for key in current_state.cables.keys():
             # print("Key!: ", key, " and load!: ", after_event.cables[key].current_load)
             if self.max_loads[key] < current_state.cables[key].current_load:
+                # print("new max")
                 self.max_loads[key] = current_state.cables[key].current_load
         
         # Update blackout statuses
@@ -70,16 +71,6 @@ class Measures:
                 self.blackout_times[key] += current_state.time - prev_state.time
             # load over time
             self.total_loads[key] += current_state.cables[key].current_load * (current_state.time - prev_state.time)
-                
-        # Update total blackout / non blackout time
-        # For each cable: if I was on 'overload' at prev event then add (current_event.time-prev_event.time) to blackout (and vice versa)
-
-
-        # Calculate load over time (what is load over time, actually?) Assuming load over time is (per cable): sum of loads / time
-
-    
-
-        # After cable load and stuff is handled, can actually update all the measures.
 
 
         # This will run all the final calculations ncessessary to close out measures.
@@ -100,7 +91,6 @@ class Measures:
         for cable in self.blackout_times:
             print("    ", cable,": ", self.blackout_times[cable], " / ", self.elapsed_time-self.blackout_times[cable])
 
-        print("TODO: Load over time (how is this defined?)")
         # print load over time
         print("Load over time, cable 0:", self.total_loads[0])
         print("Load over time, cable 1:", self.total_loads[1])

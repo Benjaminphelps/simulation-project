@@ -4,12 +4,13 @@ import pandas as pd
 
 # Generate arrivals for a given hour
 # Assumed to be correct - averaging around 750 which is perfect.
-def generate_arrivals_per_hour(hour):
+def generate_arrivals_per_hour(actual_hour):
+    modified_hour = actual_hour % 24
     arrivals_dataset = pd.read_csv('../data/arrival_hours.csv', delimiter=';')
     arrivals_dataset['Share_of_charging_transactions'] = arrivals_dataset['Share_of_charging_transactions'].str.replace(',','.').astype(float)
 
-    mu = arrivals_dataset['Share_of_charging_transactions'][hour] * 750
-    times = np.sort(np.random.uniform(hour,hour+1,np.random.poisson(mu))).tolist()
+    mu = arrivals_dataset['Share_of_charging_transactions'][modified_hour] * 750
+    times = np.sort(np.random.uniform(actual_hour,actual_hour+1,np.random.poisson(mu))).tolist()
     return times
 
 
@@ -20,7 +21,7 @@ def generate_lot_choices():
     # Draw 3 unique samples according to the distribution
     return np.random.choice(lot_options, size=3, replace=False, p=probabilities)
 
-def generate_charging_time(start_time):
+def generate_charging_duration():
     charging_volume_dataset = pd.read_csv('../data/charging_volume.csv', delimiter=';')
     charging_volume_dataset['Share_of_charging_transactions'] = charging_volume_dataset['Share_of_charging_transactions'].str.replace(',', '.').astype(float)
     volume_probs = charging_volume_dataset['Share_of_charging_transactions'].values
@@ -34,7 +35,7 @@ def generate_charging_time(start_time):
 
     return charging_time
 
-def generate_departure_time(current_time, total_charging_time, elapsed_connection_time):
+def generate_departure_time(current_time, total_charging_time):
     # Load and prepare connection time distribution
     connection_time_dataset = pd.read_csv('../data/connection_time.csv', delimiter=';')
     connection_time_dataset['Share_of_charging_transactions'] = connection_time_dataset['Share_of_charging_transactions'].str.replace(',', '.').astype(float)
@@ -50,10 +51,9 @@ def generate_departure_time(current_time, total_charging_time, elapsed_connectio
     # Enforce minimum connection time
     min_required_conn_time = 1.4 * total_charging_time
     connection_time = max(sampled_conn_time, min_required_conn_time)
-    remaining_connection_time = connection_time-elapsed_connection_time
 
     # Compute departure time
-    departure_time = current_time + remaining_connection_time
+    departure_time = current_time + connection_time
     return departure_time
     
 
