@@ -80,12 +80,13 @@ def handle_arrival (event, state):
                             assigned_parking=None,  # not sure yet
                             )
     state.vehicles[event.vehicle_id] = vehicle
-    
     # Pick a parking lot
     lot_choices = [int(x) for x in rng_models.generate_lot_choices()]
     # print ("My lot preference list is:, ", lot_choices)
     lot_found = False
     for lot in lot_choices:
+        # Need to change this for FCFS ... ? 
+        
         if (state.parking_lots[lot].spots_available > 0):         
             # Vehicle now knows its lot, so it can be set
             vehicle.assigned_parking = lot
@@ -130,7 +131,10 @@ def handle_arrival (event, state):
                 vehicle.charging_start_time = best_time
 
             # FCFS
+            # Overloads should now be impossible (and by this measure, also blackouts).
             elif (state.charging_strategy == 3):
+                # If the vehicle can fit into the parking lot, go ahead and start it right away
+
                 pass      
             
             # ELFS

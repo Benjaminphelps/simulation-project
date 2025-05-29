@@ -6,7 +6,7 @@ import copy
 
 
 # 1 = Base, 2 = Price-driven, 3 = FCFS, 4 = ELFS
-charging_strategy = 2
+charging_strategy = 3
 
 # Init state w/charging strategy
 current_state = state.State(charging_strategy = charging_strategy)
