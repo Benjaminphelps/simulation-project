@@ -29,6 +29,18 @@ class Measures:
             8 : 0,
             9 : 0
         }
+        self.total_loads = {
+            0: 0,
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0,
+            6: 0,
+            7: 0,
+            8: 0,
+            9: 0
+        }
         self.total_overload_time = 0 # Float
         self.percentage_blackout_time = 0
         self.percentage_underload_time = 0
@@ -56,12 +68,14 @@ class Measures:
             # Pretty sure this is true regardless of current state.
             if prev_state.cables[key].is_blacked_out:
                 self.blackout_times[key] += current_state.time - prev_state.time
+            # load over time
+            self.total_loads[key] += current_state.cables[key].current_load * (current_state.time - prev_state.time)
                 
         # Update total blackout / non blackout time
         # For each cable: if I was on 'overload' at prev event then add (current_event.time-prev_event.time) to blackout (and vice versa)
 
 
-        # Calculate load over time (what is load over time, actually?)
+        # Calculate load over time (what is load over time, actually?) Assuming load over time is (per cable): sum of loads / time
 
     
 
@@ -87,6 +101,17 @@ class Measures:
             print("    ", cable,": ", self.blackout_times[cable], " / ", self.elapsed_time-self.blackout_times[cable])
 
         print("TODO: Load over time (how is this defined?)")
+        # print load over time
+        print("Load over time, cable 0:", self.total_loads[0])
+        print("Load over time, cable 1:", self.total_loads[1])
+        print("Load over time, cable 2:", self.total_loads[2])
+        print("Load over time, cable 3:", self.total_loads[3])
+        print("Load over time, cable 4:", self.total_loads[4])
+        print("Load over time, cable 5:", self.total_loads[5])
+        print("Load over time, cable 6:", self.total_loads[6])
+        print("Load over time, cable 7:", self.total_loads[7])
+        print("Load over time, cable 8:", self.total_loads[8])
+        print("Load over time, cable 9:", self.total_loads[9])
 
         print("-------------------------------------------")
         print("DEPARTURE DELAYS: ")
