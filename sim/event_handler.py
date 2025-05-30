@@ -9,6 +9,8 @@ PRICE_BLOCKS = [
     (20, 24, 20),
 ]
 
+FCFS_QUEUE = [] 
+
 def get_price(hour):
     hour %= 24
     for start, end, price in PRICE_BLOCKS:
@@ -46,7 +48,6 @@ def estimate_charging_cost(start_time, duration):
 # "Vehicle Arrives", "Charging Starts", "Charging Ends", "Vehicle Departs"
 def handle (event, state):
     match event.type:
-
         case "Vehicle Arrives":
             # print("Handling event with time: ", event.time, " and type: ", event.type)
             return handle_arrival(event, state)
@@ -107,6 +108,11 @@ def handle_arrival (event, state):
             # This line will become something more dynamic in the future.
             if (state.charging_strategy == 1):
                 vehicle.charging_start_time = event.time
+                # schedule a start for charging
+                state.schedule_event(s.Event(time=vehicle.charging_start_time, type='Charging Starts', vehicle_id=vehicle.id))
+                state.parking_lots[lot].remove_spot()
+
+                lot_found = True
             
             # Price-driven
             elif (state.charging_strategy == 2):
@@ -130,13 +136,34 @@ def handle_arrival (event, state):
 
                 vehicle.charging_start_time = best_time
 
+                # schedule a start for charging
+                state.schedule_event(s.Event(time=vehicle.charging_start_time, type='Charging Starts', vehicle_id=vehicle.id))
+                state.parking_lots[lot].remove_spot()
+
+                lot_found = True
+
             # FCFS
             # Overloads should now be impossible (and by this measure, also blackouts).
             elif (state.charging_strategy == 3):
-                # If the vehicle can fit into the parking lot, go ahead and start it right away
+                # If adding a vehicle would overload cable, then add it to the FCFS queue (pretty sure the max capacity is being handled incorrectly)
+                if state.parking_lots[lot].current_load + 6.0 > state.cables[lot].max_capacity:
+                    FCFS_QUEUE.append(vehicle)
+                else:
+                    # Otherwise, vehicle can start charging right away
+                    if len(FCFS_QUEUE) == 0:
+                        vehicle.charging_start_time = event.time
+                    else:
+                        FCFS_QUEUE.append(vehicle)
+                        vehicle = FCFS_QUEUE.pop(0)  # Get the first vehicle in the queue
+                        vehicle.charging_start_time = event.time
+                
+                    # schedule a start for charging
+                    state.schedule_event(s.Event(time=vehicle.charging_start_time, type='Charging Starts', vehicle_id=vehicle.id))
+                    state.parking_lots[lot].remove_spot()
 
-                pass      
-            
+                    lot_found = True
+                        
+
             # ELFS
             elif (state.charging_strategy == 4):
                 pass
@@ -144,12 +171,6 @@ def handle_arrival (event, state):
             else:
                 print("Charging strategy not suppourted!")
                 exit(1)
-
-            # schedule a start for charging
-            state.schedule_event(s.Event(time=vehicle.charging_start_time, type='Charging Starts', vehicle_id=vehicle.id))
-            state.parking_lots[lot].remove_spot()
-
-            lot_found = True
             break
     if not lot_found:
         state.add_non_served_vehicle()
@@ -199,6 +220,14 @@ def handle_charging_end(event, state):
     vehicle.departure_time = dep
 
     state.schedule_event(s.Event(time=dep, type='Vehicle Departs', vehicle_id=event.vehicle_id) )
+
+    # If FCFS queue is not empty, we can start charging the next vehicle
+    # if state.charging_strategy == 3 and len(FCFS_QUEUE) > 0:
+    #     next_vehicle = FCFS_QUEUE.pop(0)
+    #     next_vehicle.charging_start_time = state.time
+    #     next_vehicle.charging_status = 'charging'
+    #     state.schedule_event(s.Event(time=next_vehicle.charging_start_time, type='Charging Starts', vehicle_id=next_vehicle.id))
+    #     state.parking_lots[next_vehicle.assigned_parking].remove_spot()
 
     return state
 

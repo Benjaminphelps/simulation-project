@@ -21,7 +21,7 @@ vehicle_id= 0
 hour_window = current_state.time
 
 # 10 days takes about 10 seconds to run on my computer
-number_of_days = 10
+number_of_days = 1
 
 # This loop ensures we generate times every hour
 print ("-------------------------------------------")
