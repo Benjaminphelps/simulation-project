@@ -8,8 +8,21 @@ import copy
 # 1 = Base, 2 = Price-driven, 3 = FCFS, 4 = ELFS
 charging_strategy = 4
 
+# Solar panels
+active_panels = {
+    1: True,
+    2: True,
+    6: True,
+    7: True,
+}
+
+# Season = 'Winter' or 'Summer'
+season = 'Summer'
+# Solar scenario = 'none', '1_2' or '1_2_6_7'
+solar_scenario = 'none'
+
 # Init state w/charging strategy
-current_state = state.State(charging_strategy = charging_strategy)
+current_state = state.State(charging_strategy = charging_strategy, season = season, solar_scenario=solar_scenario)
 
 # Init performance measures
 stats = performance_measures.Measures()
@@ -35,6 +48,8 @@ while (hour_window <= (24*number_of_days)-1):
     for arrival_time in arrivals:
         current_state.schedule_event(state.Event(time=arrival_time, type = 'Vehicle Arrives',vehicle_id = vehicle_id))
         vehicle_id +=1
+    
+    current_state.schedule_event(state.Event(time=hour_window, type = 'Solar update',vehicle_id = None))
 
     while (hour_window <= current_state.time < hour_window+1.0):
         

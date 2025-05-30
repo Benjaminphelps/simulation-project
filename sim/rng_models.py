@@ -1,6 +1,14 @@
 # %%
 import numpy as np
 import pandas as pd
+import state
+import os
+
+def draw_solar_factors(base_availability, num_draws):
+    draws = np.random.normal(loc=base_availability, scale=0.15 * base_availability, size=num_draws)
+    clipped_draws = np.clip(draws, 0, 1)
+    return clipped_draws
+
 
 # Generate arrivals for a given hour
 # Assumed to be correct - averaging around 750 which is perfect.
@@ -55,6 +63,45 @@ def generate_departure_time(current_time, total_charging_time):
     # Compute departure time
     departure_time = current_time + connection_time
     return departure_time
+
+def handle_solar_update(state):
+    hour = state.time%24
+    # print("Hour:" , hour)
+
+    # Load the sheet 'zon'
+    solar_df = pd.read_excel(
+        os.path.join(os.path.dirname(__file__), '../data/solar.xlsx'),
+        sheet_name='zon'
+    )
+
+    # Pick the correct column
+    season_col = 'winterAVG' if state.season == 'Winter' else 'zomerAVG'
+
+    # Lookup the value at this hour
+    row = solar_df[solar_df['hour'] == hour]
+    if row.empty:
+        raise ValueError(f"No data for hour {hour} in solar.xlsx")
+
+    availability = float(row[season_col].values[0])
+    # print(f"Solar availability at hour {hour} for {season_col}: {availability}")
+        # Randomized actual availability (Gaussian)
+    # Randomized actual availability (Gaussian)
+    
+    if state.solar_scenario == '1_2':
+        factors = 200*draw_solar_factors(availability, 2)
+        state.parking_lots[1].solar_charge = factors[0]
+        state.parking_lots[2].solar_charge = factors[1]
+        # print (factors)
+    if state.solar_scenario == '1_2_6_7':
+        factors = 200*draw_solar_factors(availability, 4)
+        state.parking_lots[1].solar_charge = factors[0]
+        state.parking_lots[2].solar_charge = factors[1]
+        state.parking_lots[6].solar_charge = factors[2]
+        state.parking_lots[7].solar_charge = factors[3]
+
+    state.update_cable_loads()
+        # print (factors)
+
     
 
 

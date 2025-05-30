@@ -22,6 +22,7 @@ class Vehicle:
 
 class ParkingLot:
     def __init__(self, spots_available):
+        self.solar_charge = 0.0
         self.spots_available = spots_available
         self.active_vehicles = []  # list of Vehicle
         self.waiting_queue = []  # list of Vehicle
@@ -65,7 +66,9 @@ class Event:
 
 
 class State:
-    def __init__(self, charging_strategy):
+    def __init__(self, charging_strategy, season, solar_scenario):
+        self.solar_scenario = solar_scenario
+        self.season = season
         self.vehicle_queue = []
         self.charging_strategy = charging_strategy
         self.non_served_vehicles = 0
@@ -96,15 +99,15 @@ class State:
         self.solar_panels = {}  # Dict[int, float]
     
     def update_cable_loads(self):
-        self.cables[2].current_load = self.parking_lots[1].current_load
-        self.cables[3].current_load = self.parking_lots[2].current_load
+        self.cables[2].current_load = abs(self.parking_lots[1].current_load - self.parking_lots[1].solar_charge) 
+        self.cables[3].current_load = abs(self.parking_lots[2].current_load - self.parking_lots[2].solar_charge) 
         self.cables[4].current_load = self.parking_lots[3].current_load
         self.cables[1].current_load = self.cables[2].current_load + self.cables[3].current_load + self.cables[4].current_load
 
-        self.cables[9].current_load = self.parking_lots[6].current_load
+        self.cables[9].current_load = abs(self.parking_lots[6].current_load - self.parking_lots[6].solar_charge) 
         self.cables[8].current_load = self.parking_lots[5].current_load
         self.cables[7].current_load = self.cables[8].current_load + self.cables[9].current_load
-        self.cables[6].current_load = self.parking_lots[7].current_load
+        self.cables[6].current_load = abs(self.parking_lots[7].current_load - self.parking_lots[7].solar_charge) 
         self.cables[5].current_load = self.cables[6].current_load + self.cables[7].current_load
 
         self.cables[0].current_load = self.cables[1].current_load + self.cables[5].current_load
@@ -124,7 +127,7 @@ class State:
     def test_overload(self, parking_lot_index, addition):
     # 1. Simulate the new loads at each parking lot
         simulated_parking_loads = {
-            i: lot.current_load + (addition if i == parking_lot_index else 0)
+            i: (abs(lot.current_load - lot.solar_charge)) + (addition if i == parking_lot_index else 0)
             for i, lot in self.parking_lots.items()
         }
 

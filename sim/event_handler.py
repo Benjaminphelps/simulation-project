@@ -62,9 +62,20 @@ def handle (event, state):
         case "Vehicle Departs":
             # print("Handling event with time: ", event.time, " and type: ", event.type)
             return handle_vehicle_departure(event, state)
+        
+        case "Solar update":
+            return handle_solar_update(event, state)
 
         case _:
             print("Unrecognized event: ", event.type)
+
+    
+def handle_solar_update(event, state):
+    # print("Handling solar update!")
+    if state.solar_scenario == 'none':
+        return state
+    rng_models.handle_solar_update(state)
+    return state
 
 def handle_arrival (event, state):
     # Handling arrival likely varies the most w/ respect to strategies
@@ -194,6 +205,7 @@ def handle_arrival (event, state):
 
 
 def handle_charging_start(event, state):
+    # print('Solar at 1:', state.parking_lots[1].solar_charge)
     # print("Handling start")
     # Get the vehicle
     vehicle = state.vehicles[event.vehicle_id]
