@@ -6,7 +6,7 @@ import copy
 
 
 # 1 = Base, 2 = Price-driven, 3 = FCFS, 4 = ELFS
-charging_strategy = 3
+charging_strategy = 4
 
 # Init state w/charging strategy
 current_state = state.State(charging_strategy = charging_strategy)
@@ -21,7 +21,7 @@ vehicle_id= 0
 hour_window = current_state.time
 
 # 10 days takes about 10 seconds to run on my computer
-number_of_days = 1
+number_of_days = 10
 
 # This loop ensures we generate times every hour
 print ("-------------------------------------------")
@@ -54,6 +54,7 @@ while (hour_window <= (24*number_of_days)-1):
         # Save previous state so we can use it in performance measures
 
         # Handle the event (Does this actually want to return state? Because it needs to look at state and also change it)
+        # print("Event type we're about to handle: ", next_event.type)
         current_state = event_handler.handle(next_event, current_state)
 
         # Update performance measures based on state before event and state after event
@@ -61,6 +62,8 @@ while (hour_window <= (24*number_of_days)-1):
 
         # Remove the event
         current_state.pop_event()
+
+  
 
     hour_window +=1.0
     current_state.time = hour_window

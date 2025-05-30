@@ -9,7 +9,6 @@ PRICE_BLOCKS = [
     (20, 24, 20),
 ]
 
-FCFS_QUEUE = [] 
 
 def get_price(hour):
     hour %= 24
@@ -84,10 +83,12 @@ def handle_arrival (event, state):
     # Pick a parking lot
     lot_choices = [int(x) for x in rng_models.generate_lot_choices()]
     # print ("My lot preference list is:, ", lot_choices)
+
+
     lot_found = False
+
     for lot in lot_choices:
         # Need to change this for FCFS ... ? 
-        
         if (state.parking_lots[lot].spots_available > 0):         
             # Vehicle now knows its lot, so it can be set
             vehicle.assigned_parking = lot
@@ -142,37 +143,49 @@ def handle_arrival (event, state):
 
                 lot_found = True
 
-            # FCFS
-            # Overloads should now be impossible (and by this measure, also blackouts).
-            elif (state.charging_strategy == 3):
-                # If adding a vehicle would overload cable, then add it to the FCFS queue (pretty sure the max capacity is being handled incorrectly)
-                if state.parking_lots[lot].current_load + 6.0 > state.cables[lot].max_capacity:
-                    FCFS_QUEUE.append(vehicle)
-                else:
-                    # Otherwise, vehicle can start charging right away
-                    if len(FCFS_QUEUE) == 0:
-                        vehicle.charging_start_time = event.time
-                    else:
-                        FCFS_QUEUE.append(vehicle)
-                        vehicle = FCFS_QUEUE.pop(0)  # Get the first vehicle in the queue
-                        vehicle.charging_start_time = event.time
                 
+            elif (state.charging_strategy == 3):
+
+                state.parking_lots[lot].remove_spot()
+                lot_found = True
+
+                # If adding immediately will cause a blackout, add to queue instead.
+                if state.test_overload(lot,6):
+                    # And then take a look at this vehicle every time you update power? It seems a bit ..laborious? 
+                    state.vehicle_queue_add(vehicle)
+                    # Add to state managed queue. Then this queue is managed each time power is updated?s
+
+                else: # we can charge immediately as per charging strat 1
+                    vehicle.charging_start_time = event.time
                     # schedule a start for charging
                     state.schedule_event(s.Event(time=vehicle.charging_start_time, type='Charging Starts', vehicle_id=vehicle.id))
-                    state.parking_lots[lot].remove_spot()
-
-                    lot_found = True
-                        
+                    
 
             # ELFS
             elif (state.charging_strategy == 4):
-                pass
+                state.parking_lots[lot].remove_spot()
+                lot_found = True
+
+                # If adding immediately will cause a blackout, add to queue instead.
+                if state.test_overload(lot,6):
+                    # And then take a look at this vehicle every time you update power? It seems a bit ..laborious? 
+                    state.vehicle_queue_add(vehicle)
+
+                    # Add to state managed queue. Then this queue is managed each time power is updated?s
+                else: # we can charge immediately as per charging strat 1
+                    vehicle.charging_start_time = event.time
+                    # schedule a start for charging
+                    state.schedule_event(s.Event(time=vehicle.charging_start_time, type='Charging Starts', vehicle_id=vehicle.id))
+
+
+                
 
             else:
                 print("Charging strategy not suppourted!")
                 exit(1)
             break
     if not lot_found:
+        # print("I got rejected!")
         state.add_non_served_vehicle()
 
     # If we get here, it means that there was no available lot.
@@ -181,27 +194,36 @@ def handle_arrival (event, state):
 
 
 def handle_charging_start(event, state):
+    # print("Handling start")
     # Get the vehicle
     vehicle = state.vehicles[event.vehicle_id]
 
     # Update the vehicle's status
     vehicle.charging_status = 'charging'
 
+    
     vehicle.charging_end_time = state.time + vehicle.charging_duration
-
     state.parking_lots[vehicle.assigned_parking].add_vehicle_load()
 
     # Update cable loads
     state.update_cable_loads()  # Assuming 6 kW charging rate
-
+    # A charging start cannot change the queue
+    # print("Scheduing charging ends")
     state.schedule_event(s.Event(time=vehicle.charging_end_time, type='Charging Ends', vehicle_id=event.vehicle_id) )
 
     return state
 
 
 def handle_charging_end(event, state):
+    # print("OK, handling at time: ", state.time)
+    # print("Handling a charging end")
+    # print("Here it is:")
+    # print("Time: ", event.time, "Type: ", event.type, " Vehicle: ", event.vehicle_id, "lot: ", state.vehicles[event.vehicle_id].assigned_parking)
     # Get the vehicle
     vehicle = state.vehicles[event.vehicle_id]
+
+    if (vehicle.charging_status == 'finished'):
+        return state
 
     # Unplug
     state.parking_lots[vehicle.assigned_parking].remove_vehicle_load()
@@ -212,6 +234,7 @@ def handle_charging_end(event, state):
 
     # Set departure time according to adapted departure time
     dep = vehicle.adapted_departure_time
+    # print("dep before loop: ", dep)
 
     # Update cable loads
     state.update_cable_loads()
@@ -219,22 +242,21 @@ def handle_charging_end(event, state):
     # Just making this field for debugging reasons.
     vehicle.departure_time = dep
 
+    # print("scheduling a departure for ", event.vehicle_id, " at time: ", dep)
     state.schedule_event(s.Event(time=dep, type='Vehicle Departs', vehicle_id=event.vehicle_id) )
 
-    # If FCFS queue is not empty, we can start charging the next vehicle
-    # if state.charging_strategy == 3 and len(FCFS_QUEUE) > 0:
-    #     next_vehicle = FCFS_QUEUE.pop(0)
-    #     next_vehicle.charging_start_time = state.time
-    #     next_vehicle.charging_status = 'charging'
-    #     state.schedule_event(s.Event(time=next_vehicle.charging_start_time, type='Charging Starts', vehicle_id=next_vehicle.id))
-    #     state.parking_lots[next_vehicle.assigned_parking].remove_spot()
+
+    # Because cable loads were updated, assign waiting cars:
+    
+    state.assign_waiting_vehicles()
 
     return state
 
 
 def handle_vehicle_departure (event, state):
-    # print("Handling departure")
+    # print("HANDLING DEPARTURE")
     # Get the vehicle
+
     vehicle = state.vehicles[event.vehicle_id]
 
     # Free up the parking spot

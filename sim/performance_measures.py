@@ -121,9 +121,12 @@ class Measures:
         print("Percentage of vehicles with a delay: ", 100*(delays/self.total_cars))
         print("Average delay over all vehicles: ", total_delay_time/self.total_cars)
         print("Max delay: ", maximum_delay)
+        print("Number of delays: ", delays)
             # print(final_state.vehicles[vehicle_id].charging_end_time, " ", final_state.vehicles[vehicle_id].departure_time)
         print("Percentage of non-served vehicles per day: NEED DAY ITERATION SUPPOURT")
         print("Average number of non-served vehicles per day: NEED DAY ITERATION SUPPOURT")      
         print("-------------------------------------------")
+
+        print("QUEUE SIZE: ", len(final_state.vehicle_queue))
         
         

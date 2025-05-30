@@ -2,6 +2,7 @@ class Vehicle:
     def __init__(self, id, arrival_time, charging_volume, connection_time,
                  adapted_departure_time, charging_status, assigned_parking):
         self.id = id
+        self.been_in_queue = False
         self.arrival_time = arrival_time
         self.charging_volume = charging_volume
         self.adapted_departure_time = adapted_departure_time
@@ -12,8 +13,11 @@ class Vehicle:
         self.charging_end_time = None  # float or None
         self.connection_start_time = None # float or None
         self.connection_end_time = None # float or None
-
+        self.charging_duration = 0
         self.departure_time = None # float or None
+    
+    def latest_feasible_start_time(self):
+        return self.adapted_departure_time-self.charging_duration
  
 
 class ParkingLot:
@@ -62,6 +66,7 @@ class Event:
 
 class State:
     def __init__(self, charging_strategy):
+        self.vehicle_queue = []
         self.charging_strategy = charging_strategy
         self.non_served_vehicles = 0
         self.time = 0.0
@@ -104,12 +109,50 @@ class State:
 
         self.cables[0].current_load = self.cables[1].current_load + self.cables[5].current_load
 
+        # i = 0 
         for cable in self.cables.values():
             # if cable load >= 110% of max capacity, blackout 
+            # print("Cable ", i, " load: ", cable.current_load)
             if cable.current_load >= 1.1 * cable.max_capacity:
                 cable.is_blacked_out = True
+            elif cable.current_load < 0:
+                cable.current_load = 0
             else:
                 cable.is_blacked_out = False
+            # i+=1
+
+    def test_overload(self, parking_lot_index, addition):
+    # 1. Simulate the new loads at each parking lot
+        simulated_parking_loads = {
+            i: lot.current_load + (addition if i == parking_lot_index else 0)
+            for i, lot in self.parking_lots.items()
+        }
+
+        # 2. Compute simulated cable loads using the same structure as update_cable_loads
+        sim_cable_loads = {}
+
+        sim_cable_loads[2] = simulated_parking_loads[1]
+        sim_cable_loads[3] = simulated_parking_loads[2]
+        sim_cable_loads[4] = simulated_parking_loads[3]
+        sim_cable_loads[1] = sim_cable_loads[2] + sim_cable_loads[3] + sim_cable_loads[4]
+
+        sim_cable_loads[9] = simulated_parking_loads[6]
+        sim_cable_loads[8] = simulated_parking_loads[5]
+        sim_cable_loads[7] = sim_cable_loads[8] + sim_cable_loads[9]
+        sim_cable_loads[6] = simulated_parking_loads[7]
+        sim_cable_loads[5] = sim_cable_loads[6] + sim_cable_loads[7]
+
+        sim_cable_loads[0] = sim_cable_loads[1] + sim_cable_loads[5]
+
+        # 3. Check for overload
+        for idx, load in sim_cable_loads.items():
+            # print("idx: ", idx, " load: ", load)
+            if load >= self.cables[idx].max_capacity:
+                # print("First cable to get overload in this setting: ", idx)
+                return True  # overload would occur
+        return False  # safe to add load
+
+
 
     def schedule_event(self, event): 
         if len(self.event_queue) == 0:
@@ -132,3 +175,43 @@ class State:
     
     def add_non_served_vehicle(self):
         self.non_served_vehicles += 1
+
+    def vehicle_queue_add(self, vehicle):
+        self.vehicle_queue.append(vehicle)
+
+    # Removal is not trivial, maybe get there later?
+    # def vehicle_queue_remove(self, vehicle)
+
+    def assign_waiting_vehicles(self):
+        assigned = []  # list of vehicles to remove from queue after assignment
+
+        if self.charging_strategy == 4:
+            # Sort queue by latest feasible start time (LFST = adapted_departure_time - charging_duration)
+            self.vehicle_queue.sort(key=lambda v: v.adapted_departure_time - v.charging_duration)
+
+        for vehicle in self.vehicle_queue:
+            if getattr(vehicle, 'been_in_queue', False):
+                continue  # Skip if vehicle has already been considered once
+
+            lot_id = vehicle.assigned_parking
+
+            # Check if starting this vehicle would cause an overload
+            if self.test_overload(parking_lot_index=lot_id, addition=6):
+                continue  # Skip assignment if overload would happen
+
+            # Mark as having been attempted (prevent re-processing in tight loops)
+            vehicle.been_in_queue = True
+
+            # Mark for assignment
+            assigned.append(vehicle)
+
+            # Update parking lot and network load
+            self.parking_lots[lot_id].current_load += 6
+            self.update_cable_loads()
+
+        # Process all successfully assigned vehicles
+        for v in assigned:
+            self.vehicle_queue.remove(v)
+            self.parking_lots[v.assigned_parking].remove_vehicle_load()
+            v.charging_start_time = self.time + 1e-6  # Prevent duplicate time bug
+            self.schedule_event(Event(time=v.charging_start_time, type='Charging Starts', vehicle_id=v.id))
