@@ -8,13 +8,7 @@ import copy
 # 1 = Base, 2 = Price-driven, 3 = FCFS, 4 = ELFS
 charging_strategy = 4
 
-# Solar panels
-active_panels = {
-    1: True,
-    2: True,
-    6: True,
-    7: True,
-}
+
 
 # Season = 'Winter' or 'Summer'
 season = 'Summer'
