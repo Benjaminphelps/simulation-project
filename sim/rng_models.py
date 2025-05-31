@@ -87,10 +87,10 @@ def handle_solar_update(state):
         # Randomized actual availability (Gaussian)
     # Randomized actual availability (Gaussian)
     
-    if state.solar_scenario == '1_2':
+    if state.solar_scenario == '6_7':
         factors = 200*draw_solar_factors(availability, 2)
-        state.parking_lots[1].solar_charge = factors[0]
-        state.parking_lots[2].solar_charge = factors[1]
+        state.parking_lots[6].solar_charge = factors[0]
+        state.parking_lots[7].solar_charge = factors[1]
         # print (factors)
     if state.solar_scenario == '1_2_6_7':
         factors = 200*draw_solar_factors(availability, 4)

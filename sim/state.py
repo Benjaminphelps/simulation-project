@@ -56,6 +56,7 @@ class Cable:
         self.overload_time = 0.0
         self.blackout_time = 0.0
         self.is_blacked_out = False
+        self.is_overload = False
 
 
 class Event:
@@ -108,7 +109,7 @@ class State:
         self.cables[8].current_load = self.parking_lots[5].current_load
         self.cables[7].current_load = self.cables[8].current_load + self.cables[9].current_load
         self.cables[6].current_load = abs(self.parking_lots[7].current_load - self.parking_lots[7].solar_charge) 
-        self.cables[5].current_load = self.cables[6].current_load + self.cables[7].current_load
+        self.cables[5].current_load = self.cables[6].current_load + self.cables[7].current_load + self.parking_lots[4].current_load
 
         self.cables[0].current_load = self.cables[1].current_load + self.cables[5].current_load
 
@@ -122,6 +123,16 @@ class State:
                 cable.current_load = 0
             else:
                 cable.is_blacked_out = False
+
+        for cable in self.cables.values():
+            # if cable load >= 110% of max capacity, blackout 
+            # print("Cable ", i, " load: ", cable.current_load)
+            if cable.max_capacity <= cable.current_load <= 1.1 * cable.max_capacity :
+                cable.is_overload = True
+            elif cable.current_load < 0:
+                cable.current_load = 0
+            else:
+                cable.is_overload = False
             # i+=1
 
     def test_overload(self, parking_lot_index, addition):
@@ -143,14 +154,14 @@ class State:
         sim_cable_loads[8] = simulated_parking_loads[5]
         sim_cable_loads[7] = sim_cable_loads[8] + sim_cable_loads[9]
         sim_cable_loads[6] = simulated_parking_loads[7]
-        sim_cable_loads[5] = sim_cable_loads[6] + sim_cable_loads[7]
+        sim_cable_loads[5] = sim_cable_loads[6] + sim_cable_loads[7] + simulated_parking_loads[4]
 
         sim_cable_loads[0] = sim_cable_loads[1] + sim_cable_loads[5]
 
         # 3. Check for overload
         for idx, load in sim_cable_loads.items():
             # print("idx: ", idx, " load: ", load)
-            if load >= self.cables[idx].max_capacity:
+            if load >= self.cables[idx].max_capacity-6:
                 # print("First cable to get overload in this setting: ", idx)
                 return True  # overload would occur
         return False  # safe to add load

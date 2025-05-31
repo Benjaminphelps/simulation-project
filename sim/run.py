@@ -6,14 +6,14 @@ import copy
 
 
 # 1 = Base, 2 = Price-driven, 3 = FCFS, 4 = ELFS
-charging_strategy = 4
+charging_strategy = 2
 
-
+# Solar scenario = 'none', '6_7' or '1_2_6_7'
+solar_scenario = 'none'
 
 # Season = 'Winter' or 'Summer'
 season = 'Summer'
-# Solar scenario = 'none', '1_2' or '1_2_6_7'
-solar_scenario = 'none'
+
 
 # Init state w/charging strategy
 current_state = state.State(charging_strategy = charging_strategy, season = season, solar_scenario=solar_scenario)
@@ -28,7 +28,7 @@ vehicle_id= 0
 hour_window = current_state.time
 
 # 10 days takes about 10 seconds to run on my computer
-number_of_days = 10
+number_of_days = 100
 
 # This loop ensures we generate times every hour
 print ("-------------------------------------------")
@@ -77,4 +77,4 @@ while (hour_window <= (24*number_of_days)-1):
     hour_window +=1.0
     current_state.time = hour_window
 
-stats.report_final_measures(current_state)
+stats.report_final_measures(current_state, vehicle_id+1, number_of_days)
