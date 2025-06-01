@@ -9,7 +9,6 @@ def draw_solar_factors(base_availability, num_draws):
     clipped_draws = np.clip(draws, 0, 1)
     return clipped_draws
 
-
 # Generate arrivals for a given hour
 # Assumed to be correct - averaging around 750 which is perfect.
 def generate_arrivals_per_hour(actual_hour):
@@ -20,7 +19,6 @@ def generate_arrivals_per_hour(actual_hour):
     mu = arrivals_dataset['Share_of_charging_transactions'][modified_hour] * 750
     times = np.sort(np.random.uniform(actual_hour,actual_hour+1,np.random.poisson(mu))).tolist()
     return times
-
 
 def generate_lot_choices():
     lot_options = np.array([1, 2, 3, 4, 5, 6, 7])
@@ -50,12 +48,10 @@ def generate_departure_time(current_time, total_charging_time):
     conn_probs = connection_time_dataset['Share_of_charging_transactions'].values
     conn_bins = connection_time_dataset['Connection_time_to_charging_station_[h]'].values  # 0 = [0,1), etc.
 
-
     # Sample connection time bin and get actual time
     conn_bin = np.random.choice(conn_bins, p=conn_probs)
     sampled_conn_time = np.random.uniform(conn_bin, conn_bin + 1)
     
-
     # Enforce minimum connection time
     min_required_conn_time = 1.4 * total_charging_time
     connection_time = max(sampled_conn_time, min_required_conn_time)
@@ -66,7 +62,6 @@ def generate_departure_time(current_time, total_charging_time):
 
 def handle_solar_update(state):
     hour = state.time%24
-    # print("Hour:" , hour)
 
     # Load the sheet 'zon'
     solar_df = pd.read_excel(
@@ -83,15 +78,12 @@ def handle_solar_update(state):
         raise ValueError(f"No data for hour {hour} in solar.xlsx")
 
     availability = float(row[season_col].values[0])
-    # print(f"Solar availability at hour {hour} for {season_col}: {availability}")
-        # Randomized actual availability (Gaussian)
-    # Randomized actual availability (Gaussian)
     
     if state.solar_scenario == '6_7':
         factors = 200*draw_solar_factors(availability, 2)
         state.parking_lots[6].solar_charge = factors[0]
         state.parking_lots[7].solar_charge = factors[1]
-        # print (factors)
+        
     if state.solar_scenario == '1_2_6_7':
         factors = 200*draw_solar_factors(availability, 4)
         state.parking_lots[1].solar_charge = factors[0]
@@ -100,7 +92,6 @@ def handle_solar_update(state):
         state.parking_lots[7].solar_charge = factors[3]
 
     state.update_cable_loads()
-        # print (factors)
 
     
 

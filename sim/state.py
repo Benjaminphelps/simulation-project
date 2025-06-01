@@ -68,6 +68,9 @@ class Event:
 
 class State:
     def __init__(self, charging_strategy, season, solar_scenario):
+        self.maximum_delay = 0
+        self.total_delay_length = 0
+        self.departure_delays = 0
         self.solar_scenario = solar_scenario
         self.season = season
         self.vehicle_queue = []
@@ -160,7 +163,7 @@ class State:
 
         # 3. Check for overload
         for idx, load in sim_cable_loads.items():
-            # print("idx: ", idx, " load: ", load)
+                
             if load >= self.cables[idx].max_capacity-6:
                 # print("First cable to get overload in this setting: ", idx)
                 return True  # overload would occur
@@ -193,17 +196,35 @@ class State:
     def vehicle_queue_add(self, vehicle):
         self.vehicle_queue.append(vehicle)
 
+    def add_departure_delay(self, length):
+        if length > self.maximum_delay:
+            self.maximum_delay = length
+        self.departure_delays +=1
+        self.total_delay_length += length
+    
+
     # Removal is not trivial, maybe get there later?
     # def vehicle_queue_remove(self, vehicle)
 
     def assign_waiting_vehicles(self):
         assigned = []  # list of vehicles to remove from queue after assignment
-
+        # print("len: ", len(self.vehicle_queue))
+        # .... ELFS appears to be working correctly?
         if self.charging_strategy == 4:
             # Sort queue by latest feasible start time (LFST = adapted_departure_time - charging_duration)
-            self.vehicle_queue.sort(key=lambda v: v.adapted_departure_time - v.charging_duration)
+            # print("Doing ELFS")
+            # print("Queue length: ", len(self.vehicle_queue))
+            # i = 0
+            # for vehicle in self.vehicle_queue:
+            #     print("Order in ELFS: ", vehicle.adapted_departure_time - vehicle.charging_duration)
+            #     i+=1
+            #     if i == 5:
+            #         break
+            self.vehicle_queue.sort(key=lambda v: (v.adapted_departure_time - v.charging_duration) - self.time)
 
+        # print("------------- Trying queue -------------")
         for vehicle in self.vehicle_queue:
+            # print("ELFS: ", vehicle.adapted_departure_time - vehicle.charging_duration)
             if getattr(vehicle, 'been_in_queue', False):
                 continue  # Skip if vehicle has already been considered once
 
@@ -212,10 +233,12 @@ class State:
             # Check if starting this vehicle would cause an overload
             if self.test_overload(parking_lot_index=lot_id, addition=6):
                 continue  # Skip assignment if overload would happen
-
+            
+        
             # Mark as having been attempted (prevent re-processing in tight loops)
             vehicle.been_in_queue = True
 
+            # print("APPENDING")
             # Mark for assignment
             assigned.append(vehicle)
 
@@ -226,6 +249,13 @@ class State:
         # Process all successfully assigned vehicles
         for v in assigned:
             self.vehicle_queue.remove(v)
-            self.parking_lots[v.assigned_parking].remove_vehicle_load()
+            self.parking_lots[v.assigned_parking].remove_vehicle_load() # -> Why remove vehicle load? is this correct? if anything add, right?
             v.charging_start_time = self.time + 1e-6  # Prevent duplicate time bug
+            # print("elfs here: ", v.adapted_departure_time - v.charging_duration) 
+            # print("Current time: ", self.time)
+            if(v.charging_start_time + v.charging_duration > v.adapted_departure_time):
+                # print("adding a delay!")
+                self.add_departure_delay((v.charging_start_time + v.charging_duration) -  v.adapted_departure_time)
+                v.adapted_departure_time = v.charging_start_time + v.charging_duration
+                # print("new dep time: ", v.adapted_departure_time)
             self.schedule_event(Event(time=v.charging_start_time, type='Charging Starts', vehicle_id=v.id))

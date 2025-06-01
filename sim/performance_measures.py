@@ -64,7 +64,7 @@ class Measures:
         self.average_vehicle_delay = 0
         self.max_delay = 0 # In document: 'maximum delays' -> Why plural?
 
-    def update_measures(self, prev_state, current_state): # -> not sure if we actually need before and after? TBD.
+    def update_measures(self, prev_state, current_state): 
         self.elapsed_time = current_state.time
         # Update car counter
         if current_state.event_queue[0].type == 'Vehicle Arrives':
@@ -73,13 +73,10 @@ class Measures:
         for key in current_state.cables.keys():
             # print("Key!: ", key, " and load!: ", after_event.cables[key].current_load)
             if self.max_loads[key] < current_state.cables[key].current_load:
-                # print("new max")
                 self.max_loads[key] = current_state.cables[key].current_load
         
         # Update blackout statuses
         for key in current_state.cables.keys():
-            # If the cable was blacked out in previous state, then add the time
-            # Pretty sure this is true regardless of current state.
             if prev_state.cables[key].is_blacked_out:
                 self.blackout_times[key] += current_state.time - prev_state.time
             # load over time
@@ -90,11 +87,8 @@ class Measures:
             # Pretty sure this is true regardless of current state.
             if prev_state.cables[key].is_overload:
                 self.overload_times[key] += current_state.time - prev_state.time
-            # load over time
-            # self.total_loads[key] += current_state.cables[key].current_load * (current_state.time - prev_state.time)
 
-
-        # This will run all the final calculations ncessessary to close out measures.
+    # This will run all the final calculations ncessessary to close out measures.
     def report_final_measures(self, final_state, total_num_vehicles, days):
         print("-------------------------------------------")
         print("SIMULATION END:")
@@ -132,7 +126,6 @@ class Measures:
             print(f"{str(cable):<6}{round(overload, 2):>12.2f}{round(non_overload, 2):>16.2f}"
                 f"{'=':>4}{round(overload_pct, 2):>12.2f}%{'/':>4}{round(non_overload_pct, 2):>16.2f}%")
             
-                # Summarized overload and blackout % for cable 1 and 5
         def pct(value):
             return round(value / self.elapsed_time * 100, 2) if self.elapsed_time > 0 else 0.0
 
@@ -143,35 +136,20 @@ class Measures:
 
         print(f"latex copy and paste: & {o1:.2f} & {b1:.2f} & {o5:.2f} & {b5:.2f}")
 
-
-        # print load over time
         for i in range(10):
             print(f"Load over time, cable {i}:", round(self.total_loads[i], 2))
 
         print("-------------------------------------------")
         print("DEPARTURE DELAYS: ")
-        delays = 0
-        total_delay_time = 0
-        maximum_delay = 0
-        for vehicle_id in final_state.vehicles:
-            try:
-                vehicle = final_state.vehicles[vehicle_id]
-                if vehicle.charging_end_time > vehicle.departure_time:
-                    delays += 1
-                    delay = vehicle.charging_end_time - vehicle.departure_time
-                    total_delay_time += delay
-                    if delay > maximum_delay:
-                        maximum_delay = delay
-            except TypeError:
-                pass
 
-        delay_percentage = 100 * (delays / self.total_cars) if self.total_cars > 0 else 0
-        avg_delay = total_delay_time / self.total_cars if self.total_cars > 0 else 0
+        print("Number of delays ", final_state.departure_delays)
+        print("Max delay: ", round(final_state.maximum_delay, 2))
+        print("Total number of cars: ", self.total_cars)
+        delay_percentage = 100 * (final_state.departure_delays / self.total_cars) if self.total_cars > 0 else 0
+        avg_delay = final_state.total_delay_length / self.total_cars if self.total_cars > 0 else 0
 
         print("Percentage of vehicles with a delay: ", round(delay_percentage, 2))
         print("Average delay over all vehicles: ", round(avg_delay, 2))
-        print("Max delay: ", round(maximum_delay, 2))
-        print("Number of delays: ", delays)
         print("Number of non-served (declined) vehicles: ", final_state.non_served_vehicles)
 
         percentage_non_served = (
@@ -195,6 +173,24 @@ class Measures:
 
         print("-------------------------------------------")
         print("QUEUE SIZE: ", len(final_state.vehicle_queue))
+
+        # This is for conf. intervals
+        return(
+            {
+                'Cable_1_overload': o1,
+                'Cable_5_overload': o5,
+
+                'Cable_1_blackout': b1,
+                'Cable_5_blackout': b5,
+
+                'Percentage_delayed': round(delay_percentage, 2),
+                'Average_delay': round(avg_delay, 2),
+                'Percentage_not_served': round(percentage_non_served, 2)
+
+            }
+        )
+
+
 
 
             
